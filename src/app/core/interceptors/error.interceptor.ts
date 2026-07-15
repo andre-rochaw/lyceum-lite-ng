@@ -44,6 +44,8 @@ function mapHttpError(error: unknown): string {
       return 'Sem permissão para esta operação.';
     case 404:
       return 'Recurso não encontrado.';
+    case 409:
+      return 'Conflito: registro duplicado ou regra de negocio.';
     case 500:
       return 'Erro interno do servidor.';
     default:

@@ -32,6 +32,11 @@ export const routes: Routes = [
         path: 'home',
         loadComponent: () => import('./features/home/home').then((m) => m.Home),
       },
+      {
+        path: 'alunos',
+        loadChildren: () =>
+          import('./features/alunos/alunos.routes').then((m) => m.ALUNOS_ROUTES),
+      },
     ],
   },
   { path: '**', redirectTo: 'login' },

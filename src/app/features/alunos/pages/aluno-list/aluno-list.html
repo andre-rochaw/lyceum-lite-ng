@@ -1,0 +1,71 @@
+<div class="flex flex-wrap items-center justify-between gap-4 mb-4">
+  <h1 class="text-xl font-medium m-0">Alunos</h1>
+  <a mat-flat-button color="primary" routerLink="/alunos/novo">
+    <mat-icon>person_add</mat-icon>
+    Novo aluno
+  </a>
+</div>
+
+@if (empty()) {
+  <p class="text-sm opacity-70 mb-4">Nenhum aluno cadastrado.</p>
+}
+
+<div class="table-wrap">
+  <table mat-table [dataSource]="alunos()" class="w-full">
+    <ng-container matColumnDef="nome">
+      <th mat-header-cell *matHeaderCellDef>Nome</th>
+      <td mat-cell *matCellDef="let row">{{ row.nome }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="email">
+      <th mat-header-cell *matHeaderCellDef>E-mail</th>
+      <td mat-cell *matCellDef="let row">{{ row.email }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="cpf">
+      <th mat-header-cell *matHeaderCellDef>CPF</th>
+      <td mat-cell *matCellDef="let row">{{ row.cpf }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="dataNascimento">
+      <th mat-header-cell *matHeaderCellDef>Nascimento</th>
+      <td mat-cell *matCellDef="let row">
+        {{ row.dataNascimento | date: 'dd/MM/yyyy' }}
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="acoes">
+      <th mat-header-cell *matHeaderCellDef>Acoes</th>
+      <td mat-cell *matCellDef="let row">
+        <a
+          mat-icon-button
+          [routerLink]="['/alunos', row.id, 'editar']"
+          aria-label="Editar aluno"
+        >
+          <mat-icon>edit</mat-icon>
+        </a>
+        <button
+          mat-icon-button
+          type="button"
+          color="warn"
+          aria-label="Excluir aluno"
+          (click)="confirmarExclusao(row)"
+        >
+          <mat-icon>delete</mat-icon>
+        </button>
+      </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+  </table>
+
+  <mat-paginator
+    [length]="totalElements()"
+    [pageIndex]="pageIndex()"
+    [pageSize]="pageSize()"
+    [pageSizeOptions]="[5, 10, 20]"
+    (page)="onPage($event)"
+    showFirstLastButtons
+  />
+</div>
