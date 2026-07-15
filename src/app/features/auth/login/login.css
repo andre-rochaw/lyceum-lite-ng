@@ -1,0 +1,9 @@
+:host {
+  display: block;
+  width: 40%;
+  box-sizing: border-box;
+}
+
+.login-card {
+  width: 100%;
+}

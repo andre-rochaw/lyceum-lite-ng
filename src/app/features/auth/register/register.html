@@ -1,0 +1,75 @@
+<mat-card class="auth-card register-card">
+  <mat-card-header>
+    <mat-card-title>Criar conta</mat-card-title>
+    <mat-card-subtitle>Cadastro de um novo usuario</mat-card-subtitle>
+  </mat-card-header>
+
+  <mat-card-content class="auth-card__content">
+    <form class="auth-card__form" [formGroup]="form" (ngSubmit)="submit()">
+      <mat-form-field appearance="outline">
+        <mat-label>Nome</mat-label>
+        <input matInput formControlName="name" autocomplete="name" />
+        @if (form.controls.name.touched && form.controls.name.hasError('required')) {
+          <mat-error>Nome obrigatorio</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>E-mail</mat-label>
+        <input matInput type="email" formControlName="email" autocomplete="username" />
+        @if (form.controls.email.touched && form.controls.email.invalid) {
+          <mat-error>Informe um e-mail valido</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>CPF</mat-label>
+        <input
+          matInput
+          formControlName="cpf"
+          inputmode="numeric"
+          autocomplete="off"
+          placeholder="000.000.000-00"
+          maxlength="14"
+          (input)="onCpfInput($event)"
+        />
+        <mat-hint>Formato: 999.999.999-99</mat-hint>
+        @if (form.controls.cpf.touched && form.controls.cpf.invalid) {
+          <mat-error>CPF invalido (use 999.999.999-99)</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Senha</mat-label>
+        <input matInput type="password" formControlName="password" autocomplete="new-password" />
+        <mat-hint>Min. 8 caracteres, uma maiuscula e um numero</mat-hint>
+        @if (form.controls.password.touched && form.controls.password.invalid) {
+          <mat-error>Senha invalida (min. 8, 1 maiuscula e 1 numero)</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Confirmar senha</mat-label>
+        <input
+          matInput
+          type="password"
+          formControlName="confirmPassword"
+          autocomplete="new-password"
+        />
+        @if (form.controls.confirmPassword.touched && form.controls.confirmPassword.hasError('required')) {
+          <mat-error>Confirme a senha</mat-error>
+        } @else if (form.hasError('passwordsMismatch') && form.controls.confirmPassword.touched) {
+          <mat-error>As senhas nao coincidem</mat-error>
+        }
+      </mat-form-field>
+
+      <button mat-flat-button color="primary" type="submit" [disabled]="submitting">
+        Cadastrar
+      </button>
+    </form>
+  </mat-card-content>
+
+  <mat-card-actions align="end">
+    <a mat-button routerLink="/login">Ja tenho conta</a>
+  </mat-card-actions>
+</mat-card>

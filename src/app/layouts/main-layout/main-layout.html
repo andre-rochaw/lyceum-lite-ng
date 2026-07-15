@@ -1,0 +1,40 @@
+<mat-sidenav-container class="shell-container">
+  <mat-sidenav mode="side" opened class="shell-sidenav">
+    <div class="p-4 font-medium">Lyceum Lite</div>
+    <mat-nav-list>
+      <a mat-list-item routerLink="/home" routerLinkActive="active-link">
+        <mat-icon matListItemIcon>home</mat-icon>
+        <span matListItemTitle>Home</span>
+      </a>
+      <a mat-list-item disabled>
+        <mat-icon matListItemIcon>school</mat-icon>
+        <span matListItemTitle>Alunos</span>
+      </a>
+      <a mat-list-item disabled>
+        <mat-icon matListItemIcon>menu_book</mat-icon>
+        <span matListItemTitle>Cursos</span>
+      </a>
+      <a mat-list-item disabled>
+        <mat-icon matListItemIcon>assignment</mat-icon>
+        <span matListItemTitle>Matrículas</span>
+      </a>
+      <a mat-list-item (click)="logout()" (keyup.enter)="logout()" tabindex="0">
+        <mat-icon matListItemIcon>logout</mat-icon>
+        <span matListItemTitle>Logout</span>
+      </a>
+    </mat-nav-list>
+  </mat-sidenav>
+
+  <mat-sidenav-content>
+    <mat-toolbar color="primary">
+      <span>Sistema Acadêmico</span>
+      <span class="flex-1"></span>
+      @if (user(); as u) {
+        <span class="text-sm opacity-90">{{ u.name }}</span>
+      }
+    </mat-toolbar>
+    <main class="p-6">
+      <router-outlet />
+    </main>
+  </mat-sidenav-content>
+</mat-sidenav-container>

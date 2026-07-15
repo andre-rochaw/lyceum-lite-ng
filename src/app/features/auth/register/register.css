@@ -1,0 +1,9 @@
+:host {
+  display: block;
+  width: 40%;
+  box-sizing: border-box;
+}
+
+.register-card {
+  width: 100%;
+}

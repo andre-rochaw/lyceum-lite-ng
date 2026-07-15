@@ -1,0 +1,14 @@
+.app-root {
+  min-height: 100dvh;
+}
+
+.global-loading {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: color-mix(in srgb, #000 25%, transparent);
+  pointer-events: none;
+}
