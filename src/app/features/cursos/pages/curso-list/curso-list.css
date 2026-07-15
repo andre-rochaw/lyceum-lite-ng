@@ -1,0 +1,9 @@
+:host {
+  display: block;
+}
+
+.table-wrap {
+  overflow-x: auto;
+  border-radius: 8px;
+  background: var(--mat-sys-surface-container-lowest, transparent);
+}

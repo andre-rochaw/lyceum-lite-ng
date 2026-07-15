@@ -1,0 +1,49 @@
+<div class="curso-form-page">
+  @if (loading()) {
+    <p class="text-sm opacity-70">Carregando curso...</p>
+  } @else {
+    <mat-card class="curso-form-card">
+      <mat-card-header>
+        <mat-card-title>{{ isEdit() ? 'Editar curso' : 'Novo curso' }}</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <form class="curso-form" [formGroup]="form" (ngSubmit)="submit()">
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Nome</mat-label>
+            <input matInput formControlName="nome" autocomplete="off" />
+            @if (form.controls.nome.hasError('required')) {
+              <mat-error>Nome e obrigatorio</mat-error>
+            } @else if (form.controls.nome.hasError('minlength')) {
+              <mat-error>Minimo de 3 caracteres</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Descricao (opcional)</mat-label>
+            <textarea
+              matInput
+              formControlName="descricao"
+              rows="4"
+              maxlength="500"
+            ></textarea>
+            @if (form.controls.descricao.hasError('maxlength')) {
+              <mat-error>Maximo de 500 caracteres</mat-error>
+            }
+          </mat-form-field>
+
+          <div class="curso-form__actions">
+            <a mat-button routerLink="/cursos">Cancelar</a>
+            <button
+              mat-flat-button
+              color="primary"
+              type="submit"
+              [disabled]="submitting()"
+            >
+              Salvar
+            </button>
+          </div>
+        </form>
+      </mat-card-content>
+    </mat-card>
+  }
+</div>
