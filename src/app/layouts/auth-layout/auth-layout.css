@@ -1,0 +1,21 @@
+/* Auth shell layout — sizes the routed page host next to router-outlet */
+.auth-shell {
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  box-sizing: border-box;
+  background: linear-gradient(
+    160deg,
+    color-mix(in srgb, var(--mat-sys-primary) 12%, transparent),
+    var(--mat-sys-surface, #fafafa) 45%
+  );
+}
+
+/* Angular places the routed component as sibling of <router-outlet> */
+.auth-shell > *:not(router-outlet) {
+  display: block;
+  width: 60%;
+  box-sizing: border-box;
+}
