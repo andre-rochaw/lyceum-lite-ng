@@ -6,6 +6,7 @@ import {
 import { delay, of, throwError } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { AuthUser } from '../auth/auth.models';
+import { ApiError } from '../../shared/utils/api-error';
 
 interface MockUserRecord {
   id: string;
@@ -19,6 +20,16 @@ interface MockUserRecord {
 const users = new Map<string, MockUserRecord>();
 let mockRefreshValid = false;
 let currentEmail: string | null = null;
+
+
+function apiError(status: number, message: string): HttpErrorResponse {
+  const body: ApiError = {
+    timestamp: new Date().toISOString(),
+    status,
+    message,
+  };
+  return new HttpErrorResponse({ status, error: body });
+}
 
 users.set('demo@techne.com', {
   id: '1',
@@ -54,12 +65,12 @@ export const mockAuthInterceptor: HttpInterceptorFn = (req, next) => {
     const body = req.body as { name: string; email: string; password: string; cpf?: string };
     if (!body?.email || !body?.password || !body?.name) {
       return throwError(
-        () => new HttpErrorResponse({ status: 400, error: 'Campos obrigatorios ausentes.' }),
+        () => apiError(400, 'Campos obrigatórios ausentes.'),
       ).pipe(delay(200));
     }
     if (users.has(body.email.toLowerCase())) {
       return throwError(
-        () => new HttpErrorResponse({ status: 400, error: 'E-mail jÃ¡ cadastrado.' }),
+        () => apiError(400, 'E-mail já cadastrado.'),
       ).pipe(delay(200));
     }
     users.set(body.email.toLowerCase(), {
@@ -78,7 +89,7 @@ export const mockAuthInterceptor: HttpInterceptorFn = (req, next) => {
     const user = users.get(body.email?.toLowerCase());
     if (!user || user.password !== body.password) {
       return throwError(
-        () => new HttpErrorResponse({ status: 401, error: 'Login ou senha invÃ¡lidos.' }),
+        () => apiError(401, 'Login ou senha inválidos.'),
       ).pipe(delay(200));
     }
     user.lastLogin = new Date().toISOString();
@@ -95,7 +106,7 @@ export const mockAuthInterceptor: HttpInterceptorFn = (req, next) => {
   if (req.method === 'POST' && path.endsWith('/auth/refresh')) {
     if (!mockRefreshValid || !currentEmail) {
       return throwError(
-        () => new HttpErrorResponse({ status: 401, error: 'Refresh invÃ¡lido.' }),
+        () => apiError(401, 'Refresh inválido.'),
       ).pipe(delay(150));
     }
     return of(
@@ -110,13 +121,13 @@ export const mockAuthInterceptor: HttpInterceptorFn = (req, next) => {
     const auth = req.headers.get('Authorization');
     if (!auth?.startsWith('Bearer ') || !currentEmail) {
       return throwError(
-        () => new HttpErrorResponse({ status: 401, error: 'NÃ£o autenticado.' }),
+        () => apiError(401, 'Não autenticado.'),
       ).pipe(delay(150));
     }
     const user = users.get(currentEmail);
     if (!user) {
       return throwError(
-        () => new HttpErrorResponse({ status: 401, error: 'NÃ£o autenticado.' }),
+        () => apiError(401, 'Não autenticado.'),
       ).pipe(delay(150));
     }
     return of(new HttpResponse({ status: 200, body: toAuthUser(user) })).pipe(delay(150));
