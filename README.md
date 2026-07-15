@@ -22,7 +22,11 @@ Abre em `http://localhost:4200/`.
   - `GET /api/usuario/por-token-jwt`
   - `POST /api/usuario/logout`
 
-Guards (`GuestGuard` / `AuthGuard`) usam `ensureSession()` (refresh + me). Com cookie valido, `/login` e `/register` redirecionam para `/home`; apos logout, `/home` volta para `/login`.
+Guards (`canActivate`):
+
+- **`authGuard` (`/home`):** sem sessao em memoria chama `ensureSession()` (refresh + me). Falha → `/login`. Com cookie HttpOnly valido, F5 em `/home` pode recuperar a sessao.
+- **`guestGuard` (`/login`, `/register`):** so checa autenticacao **em memoria**. Logado na mesma sessao SPA → `/home`. Apos F5, `/login`/`/register` permanecem acessiveis mesmo com cookie (guest nao faz silent refresh).
+- Apos logout, `/home` volta para `/login`.
 
 Atalho equivalente: `npm run start:api`.
 

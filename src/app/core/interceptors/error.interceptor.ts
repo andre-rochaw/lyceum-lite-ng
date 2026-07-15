@@ -6,6 +6,7 @@ import {
 import { inject } from '@angular/core';
 import { catchError, throwError } from 'rxjs';
 import { NotificationService } from '../services/notification.service';
+import { extractApiErrorMessage } from '../../shared/utils/api-error';
 
 export const SKIP_TOAST_CTX = new HttpContextToken<boolean>(() => false);
 
@@ -24,33 +25,30 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
 
 function mapHttpError(error: unknown): string {
   if (!(error instanceof HttpErrorResponse)) {
-    return 'Falha na comunicacao com o servidor.';
+    return 'Falha na comunicação com o servidor.';
   }
 
-  if (typeof error.error === 'string' && error.error.trim()) {
-    return error.error;
-  }
-  if (Array.isArray(error.error) && error.error.length) {
-    return error.error.join('; ');
-  }
-  if (error.error?.message) {
-    return String(error.error.message);
+  const fromApi = extractApiErrorMessage(error.error);
+  if (fromApi) {
+    return fromApi;
   }
 
   switch (error.status) {
     case 0:
-      return 'Nao foi possivel conectar a API. Verifique se ela esta no ar.';
+      return 'Não foi possível conectar à API. Verifique se ela está no ar.';
     case 400:
-      return 'Dados invalidos. Verifique o formulario.';
+      return 'Dados inválidos. Verifique o formulário.';
     case 401:
-      return 'Sessao expirada. Faca login novamente.';
+      return 'Sessão expirada. Faça login novamente.';
     case 403:
-      return 'Sem permissao para esta operacao.';
+      return 'Sem permissão para esta operação.';
     case 404:
-      return 'Recurso nao encontrado.';
+      return 'Recurso não encontrado.';
+    case 409:
+      return 'Conflito: registro duplicado ou regra de negocio.';
     case 500:
-      return 'Erro inesperado no servidor.';
+      return 'Erro interno do servidor.';
     default:
-      return error.message || 'Falha na comunicacao com o servidor.';
+      return error.message || 'Falha na comunicação com o servidor.';
   }
 }
