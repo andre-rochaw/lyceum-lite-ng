@@ -1,0 +1,166 @@
+<div class="flex flex-wrap items-center justify-between gap-4 mb-4">
+  <h1 class="text-xl font-medium m-0">Turmas</h1>
+  <a mat-flat-button color="primary" routerLink="/turmas/novo">
+    <mat-icon>add</mat-icon>
+    Nova turma
+  </a>
+</div>
+
+<form class="list-toolbar mb-4" [formGroup]="filtros" (ngSubmit)="aplicarFiltros()">
+  <mat-form-field appearance="outline" class="filter-field" subscriptSizing="dynamic">
+    <mat-label>Nome</mat-label>
+    <input matInput formControlName="nome" autocomplete="off" />
+    <mat-icon matSuffix>search</mat-icon>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="filter-field" subscriptSizing="dynamic">
+    <mat-label>Disciplina</mat-label>
+    <input
+      matInput
+      formControlName="disciplinaBusca"
+      [matAutocomplete]="disciplinaAuto"
+      autocomplete="off"
+    />
+    <mat-autocomplete
+      #disciplinaAuto="matAutocomplete"
+      [displayWith]="displayDisciplina"
+      (optionSelected)="onDisciplinaSelected($event)"
+    >
+      @for (disciplina of disciplinasSugestoes(); track disciplina.id) {
+        <mat-option [value]="disciplina">{{ disciplina.nome }}</mat-option>
+      }
+      @if (emptyDisciplinas()) {
+        <mat-option [value]="null">Nenhuma disciplina encontrada</mat-option>
+      }
+    </mat-autocomplete>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="filter-field" subscriptSizing="dynamic">
+    <mat-label>Curso</mat-label>
+    <input
+      matInput
+      formControlName="cursoBusca"
+      [matAutocomplete]="cursoAuto"
+      autocomplete="off"
+    />
+    <mat-autocomplete
+      #cursoAuto="matAutocomplete"
+      [displayWith]="displayCurso"
+      (optionSelected)="onCursoSelected($event)"
+    >
+      @for (curso of cursosSugestoes(); track curso.id) {
+        <mat-option [value]="curso">{{ curso.nome }}</mat-option>
+      }
+      @if (emptyCursos()) {
+        <mat-option [value]="null">Nenhum curso encontrado</mat-option>
+      }
+    </mat-autocomplete>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="filter-field-sm" subscriptSizing="dynamic">
+    <mat-label>Ano</mat-label>
+    <input matInput type="number" min="1" formControlName="ano" />
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="filter-field-sm" subscriptSizing="dynamic">
+    <mat-label>Semestre</mat-label>
+    <input matInput type="number" min="1" formControlName="semestre" />
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="filter-field-sm" subscriptSizing="dynamic">
+    <mat-label>Status</mat-label>
+    <mat-select formControlName="status">
+      <mat-option [value]="null">Todos</mat-option>
+      @for (st of statusOptions; track st) {
+        <mat-option [value]="st">{{ st }}</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+
+  <div class="filter-actions">
+    <button mat-stroked-button type="submit">Filtrar</button>
+    <button mat-button type="button" (click)="limparFiltros()">Limpar</button>
+  </div>
+</form>
+
+@if (empty()) {
+  <p class="text-sm opacity-70 mb-4">Nenhuma turma encontrada.</p>
+}
+
+<div class="table-wrap">
+  <table mat-table [dataSource]="turmas()" class="w-full">
+    <ng-container matColumnDef="nome">
+      <th mat-header-cell *matHeaderCellDef>Nome</th>
+      <td mat-cell *matCellDef="let row">{{ row.nome }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="disciplinaNome">
+      <th mat-header-cell *matHeaderCellDef>Disciplina</th>
+      <td mat-cell *matCellDef="let row">{{ row.disciplinaNome }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="cursoNome">
+      <th mat-header-cell *matHeaderCellDef>Curso</th>
+      <td mat-cell *matCellDef="let row">{{ row.cursoNome }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="ano">
+      <th mat-header-cell *matHeaderCellDef>Ano</th>
+      <td mat-cell *matCellDef="let row">{{ row.ano }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="semestre">
+      <th mat-header-cell *matHeaderCellDef>Semestre</th>
+      <td mat-cell *matCellDef="let row">{{ row.semestre }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="status">
+      <th mat-header-cell *matHeaderCellDef>Status</th>
+      <td mat-cell *matCellDef="let row">{{ row.status }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="limiteVagas">
+      <th mat-header-cell *matHeaderCellDef>Limite</th>
+      <td mat-cell *matCellDef="let row">{{ row.limiteVagas }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="vagasOcupadas">
+      <th mat-header-cell *matHeaderCellDef>Ocupadas</th>
+      <td mat-cell *matCellDef="let row">{{ row.vagasOcupadas }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="acoes">
+      <th mat-header-cell *matHeaderCellDef></th>
+      <td mat-cell *matCellDef="let row">
+        <a
+          mat-icon-button
+          [routerLink]="['/turmas', row.id, 'editar']"
+          aria-label="Editar turma"
+        >
+          <mat-icon>edit</mat-icon>
+        </a>
+        <button
+          mat-icon-button
+          type="button"
+          color="warn"
+          aria-label="Excluir turma"
+          (click)="confirmarExclusao(row)"
+        >
+          <mat-icon>delete</mat-icon>
+        </button>
+      </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+  </table>
+
+  <mat-paginator
+    [length]="totalElements()"
+    [pageIndex]="pageIndex()"
+    [pageSize]="pageSize()"
+    [pageSizeOptions]="[5, 10, 20]"
+    (page)="onPage($event)"
+    showFirstLastButtons
+  />
+</div>

@@ -49,6 +49,11 @@ export const routes: Routes = [
             (m) => m.DISCIPLINAS_ROUTES,
           ),
       },
+      {
+        path: 'turmas',
+        loadChildren: () =>
+          import('./features/turmas/turmas.routes').then((m) => m.TURMAS_ROUTES),
+      },
     ],
   },
   { path: '**', redirectTo: 'login' },
