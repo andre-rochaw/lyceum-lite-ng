@@ -1,0 +1,94 @@
+<div class="matricula-form-page">
+  <mat-card class="matricula-form-card">
+    <mat-card-header>
+      <mat-card-title>Nova matricula</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <form class="matricula-form" [formGroup]="form" (ngSubmit)="submit()">
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-label>Aluno</mat-label>
+          <input
+            matInput
+            formControlName="alunoBusca"
+            [matAutocomplete]="alunoAuto"
+            autocomplete="off"
+          />
+          <mat-autocomplete
+            #alunoAuto="matAutocomplete"
+            [displayWith]="displayAluno"
+            (optionSelected)="onAlunoSelected($event)"
+          >
+            @for (aluno of alunosSugestoes(); track aluno.id) {
+              <mat-option [value]="aluno">
+                {{ aluno.nome }}
+                @if (aluno.email) {
+                  ({{ aluno.email }})
+                }
+              </mat-option>
+            }
+            @if (emptyAlunos()) {
+              <mat-option [value]="null">Nenhum aluno encontrado</mat-option>
+            }
+          </mat-autocomplete>
+          @if (
+            form.controls.alunoBusca.hasError('required') ||
+            form.controls.alunoBusca.hasError('alunoNaoSelecionado') ||
+            (form.controls.alunoId.hasError('required') &&
+              form.controls.alunoBusca.touched)
+          ) {
+            <mat-error>Selecione um aluno na lista de sugestoes</mat-error>
+          }
+          <mat-icon matSuffix>search</mat-icon>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-label>Turma</mat-label>
+          <input
+            matInput
+            formControlName="turmaBusca"
+            [matAutocomplete]="turmaAuto"
+            autocomplete="off"
+          />
+          <mat-autocomplete
+            #turmaAuto="matAutocomplete"
+            [displayWith]="displayTurma"
+            (optionSelected)="onTurmaSelected($event)"
+          >
+            @for (turma of turmasSugestoes(); track turma.id) {
+              <mat-option [value]="turma">
+                {{ turma.nome }}
+                @if (turma.disciplinaNome) {
+                  - {{ turma.disciplinaNome }}
+                }
+              </mat-option>
+            }
+            @if (emptyTurmas()) {
+              <mat-option [value]="null">Nenhuma turma encontrada</mat-option>
+            }
+          </mat-autocomplete>
+          @if (
+            form.controls.turmaBusca.hasError('required') ||
+            form.controls.turmaBusca.hasError('turmaNaoSelecionada') ||
+            (form.controls.turmaId.hasError('required') &&
+              form.controls.turmaBusca.touched)
+          ) {
+            <mat-error>Selecione uma turma na lista de sugestoes</mat-error>
+          }
+          <mat-icon matSuffix>search</mat-icon>
+        </mat-form-field>
+
+        <div class="matricula-form__actions">
+          <a mat-button routerLink="/matriculas">Cancelar</a>
+          <button
+            mat-flat-button
+            color="primary"
+            type="submit"
+            [disabled]="submitting()"
+          >
+            Salvar
+          </button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>
