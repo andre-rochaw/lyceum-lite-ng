@@ -11,6 +11,7 @@ import {
 } from '@angular/material/autocomplete';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
+import { MatDialog } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
@@ -23,8 +24,10 @@ import {
 } from 'rxjs';
 import { AlunoService } from '../../../alunos/data/aluno.service';
 import { AlunoResponse } from '../../../alunos/models/aluno.models';
-import { TurmaService } from '../../../turmas/data/turma.service';
-import { TurmaResponse } from '../../../turmas/models/turma.models';
+import {
+  TurmaPickerDialog,
+  TurmaPickerResult,
+} from '../../components/turma-picker-dialog/turma-picker-dialog';
 import { MatriculaService } from '../../data/matricula.service';
 import { CreateMatriculaRequest } from '../../models/matricula.models';
 import { NotificationService } from '../../../../core/services/notification.service';
@@ -48,7 +51,7 @@ export class MatriculaForm implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly matriculaService = inject(MatriculaService);
   private readonly alunoService = inject(AlunoService);
-  private readonly turmaService = inject(TurmaService);
+  private readonly dialog = inject(MatDialog);
   private readonly notifications = inject(NotificationService);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
@@ -56,16 +59,13 @@ export class MatriculaForm implements OnInit {
   readonly submitting = signal(false);
   readonly alunosSugestoes = signal<AlunoResponse[]>([]);
   readonly emptyAlunos = signal(false);
-  readonly turmasSugestoes = signal<TurmaResponse[]>([]);
-  readonly emptyTurmas = signal(false);
 
   private selectedAlunoNome: string | null = null;
-  private selectedTurmaNome: string | null = null;
 
   readonly form = this.fb.nonNullable.group({
     alunoBusca: ['', Validators.required],
     alunoId: [null as string | null, Validators.required],
-    turmaBusca: ['', Validators.required],
+    turmaNome: ['', Validators.required],
     turmaId: [null as string | null, Validators.required],
   });
 
@@ -106,44 +106,6 @@ export class MatriculaForm implements OnInit {
           this.alunosSugestoes.set(result.content ?? []);
         },
       });
-
-    this.form.controls.turmaBusca.valueChanges
-      .pipe(
-        debounceTime(300),
-        distinctUntilChanged(),
-        switchMap((termo) => {
-          if (termo && typeof termo === 'object' && 'id' in termo) {
-            return of(null);
-          }
-          const trimmed = String(termo ?? '').trim();
-          if (this.selectedTurmaNome !== null && trimmed !== this.selectedTurmaNome) {
-            this.form.controls.turmaId.setValue(null);
-            this.selectedTurmaNome = null;
-          }
-          if (trimmed.length < 1) {
-            this.turmasSugestoes.set([]);
-            return of(null);
-          }
-          return this.turmaService.listar({
-            nome: trimmed,
-            page: 0,
-            size: 10,
-            sort: 'nome',
-            status: 'ABERTA',
-          });
-        }),
-        takeUntilDestroyed(this.destroyRef),
-      )
-      .subscribe({
-        next: (result) => {
-          if (result == null || result.content.length === 0) {
-            this.emptyTurmas.set(true);
-            return;
-          }
-          this.emptyTurmas.set(false);
-          this.turmasSugestoes.set(result.content ?? []);
-        },
-      });
   }
 
   onAlunoSelected(event: MatAutocompleteSelectedEvent): void {
@@ -158,18 +120,6 @@ export class MatriculaForm implements OnInit {
     this.form.controls.alunoBusca.updateValueAndValidity({ emitEvent: false });
   }
 
-  onTurmaSelected(event: MatAutocompleteSelectedEvent): void {
-    const turma = event.option.value as TurmaResponse | null;
-    if (!turma?.id) {
-      return;
-    }
-    this.selectedTurmaNome = turma.nome;
-    this.emptyTurmas.set(false);
-    this.form.controls.turmaId.setValue(turma.id);
-    this.form.controls.turmaBusca.setValue(turma.nome, { emitEvent: false });
-    this.form.controls.turmaBusca.updateValueAndValidity({ emitEvent: false });
-  }
-
   displayAluno = (value: string | AlunoResponse | null): string => {
     if (value == null) {
       return '';
@@ -180,15 +130,28 @@ export class MatriculaForm implements OnInit {
     return value.nome;
   };
 
-  displayTurma = (value: string | TurmaResponse | null): string => {
-    if (value == null) {
-      return '';
-    }
-    if (typeof value === 'string') {
-      return value;
-    }
-    return value.nome;
-  };
+  abrirBuscaTurma(): void {
+    const ref = this.dialog.open(TurmaPickerDialog, {
+      width: '960px',
+      maxWidth: '96vw',
+      autoFocus: 'first-heading',
+    });
+
+    ref.afterClosed().subscribe((result: TurmaPickerResult | undefined) => {
+      if (!result?.turmaId) {
+        return;
+      }
+      this.form.controls.turmaId.setValue(result.turmaId);
+      this.form.controls.turmaNome.setValue(result.turmaNome);
+      this.form.controls.turmaNome.updateValueAndValidity();
+      this.form.controls.turmaId.updateValueAndValidity();
+    });
+  }
+
+  limparTurma(): void {
+    this.form.controls.turmaId.setValue(null);
+    this.form.controls.turmaNome.setValue('');
+  }
 
   submit(): void {
     if (
@@ -201,7 +164,7 @@ export class MatriculaForm implements OnInit {
         this.form.controls.alunoBusca.setErrors({ alunoNaoSelecionado: true });
       }
       if (!this.form.controls.turmaId.value) {
-        this.form.controls.turmaBusca.setErrors({ turmaNaoSelecionada: true });
+        this.form.controls.turmaNome.setErrors({ turmaNaoSelecionada: true });
       }
       this.notifications.error(
         'Preencha os campos corretamente antes de salvar.',

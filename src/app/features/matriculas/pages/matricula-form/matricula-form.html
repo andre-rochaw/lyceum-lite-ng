@@ -41,41 +41,48 @@
           <mat-icon matSuffix>search</mat-icon>
         </mat-form-field>
 
-        <mat-form-field appearance="outline" class="w-full">
-          <mat-label>Turma</mat-label>
-          <input
-            matInput
-            formControlName="turmaBusca"
-            [matAutocomplete]="turmaAuto"
-            autocomplete="off"
-          />
-          <mat-autocomplete
-            #turmaAuto="matAutocomplete"
-            [displayWith]="displayTurma"
-            (optionSelected)="onTurmaSelected($event)"
+        <div class="turma-field-row">
+          <mat-form-field appearance="outline" class="turma-field">
+            <mat-label>Turma</mat-label>
+            <input
+              matInput
+              formControlName="turmaNome"
+              readonly
+              autocomplete="off"
+              placeholder="Nenhuma turma selecionada"
+            />
+            @if (
+              form.controls.turmaNome.hasError('required') ||
+              form.controls.turmaNome.hasError('turmaNaoSelecionada') ||
+              (form.controls.turmaId.hasError('required') &&
+                form.controls.turmaNome.touched)
+            ) {
+              <mat-error>Selecione uma turma pela busca avancada</mat-error>
+            }
+            @if (form.controls.turmaId.value) {
+              <button
+                matSuffix
+                mat-icon-button
+                type="button"
+                aria-label="Limpar turma"
+                (click)="limparTurma()"
+              >
+                <mat-icon>close</mat-icon>
+              </button>
+            }
+          </mat-form-field>
+
+          <button
+            mat-stroked-button
+            color="primary"
+            type="button"
+            class="turma-search-btn"
+            (click)="abrirBuscaTurma()"
           >
-            @for (turma of turmasSugestoes(); track turma.id) {
-              <mat-option [value]="turma">
-                {{ turma.nome }}
-                @if (turma.disciplinaNome) {
-                  - {{ turma.disciplinaNome }}
-                }
-              </mat-option>
-            }
-            @if (emptyTurmas()) {
-              <mat-option [value]="null">Nenhuma turma encontrada</mat-option>
-            }
-          </mat-autocomplete>
-          @if (
-            form.controls.turmaBusca.hasError('required') ||
-            form.controls.turmaBusca.hasError('turmaNaoSelecionada') ||
-            (form.controls.turmaId.hasError('required') &&
-              form.controls.turmaBusca.touched)
-          ) {
-            <mat-error>Selecione uma turma na lista de sugestoes</mat-error>
-          }
-          <mat-icon matSuffix>search</mat-icon>
-        </mat-form-field>
+            <mat-icon>search</mat-icon>
+            Buscar turma
+          </button>
+        </div>
 
         <div class="matricula-form__actions">
           <a mat-button routerLink="/matriculas">Cancelar</a>

@@ -24,6 +24,22 @@
   margin-top: 0.5rem;
 }
 
+.turma-field-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.turma-field {
+  flex: 1 1 16rem;
+  min-width: 0;
+}
+
+.turma-search-btn {
+  margin-top: 0.25rem;
+}
+
 .matricula-form__actions {
   display: flex;
   flex-wrap: wrap;
