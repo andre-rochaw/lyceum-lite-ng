@@ -26,4 +26,5 @@ export interface CursoPageQuery {
   page: number;
   size: number;
   sort?: string;
+  nome?: string;
 }

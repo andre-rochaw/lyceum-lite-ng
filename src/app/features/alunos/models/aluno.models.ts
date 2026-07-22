@@ -30,4 +30,5 @@ export interface AlunoPageQuery {
   page: number;
   size: number;
   sort?: string;
+  nome?: string;
 }

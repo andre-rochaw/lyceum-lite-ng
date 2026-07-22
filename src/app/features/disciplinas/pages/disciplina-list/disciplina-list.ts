@@ -1,4 +1,3 @@
-import { DatePipe } from '@angular/common';
 import { Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
@@ -11,16 +10,15 @@ import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatTableModule } from '@angular/material/table';
 import { RouterLink } from '@angular/router';
 import { debounceTime, distinctUntilChanged } from 'rxjs';
-import { ConfirmExcluirAlunoDialog } from '../../components/confirm-excluir-aluno-dialog';
-import { AlunoService } from '../../data/aluno.service';
-import { AlunoResponse } from '../../models/aluno.models';
+import { ConfirmExcluirDisciplinaDialog } from '../../components/confirm-excluir-disciplina-dialog';
+import { DisciplinaService } from '../../data/disciplina.service';
+import { DisciplinaResponse } from '../../models/disciplina.models';
 import { NotificationService } from '../../../../core/services/notification.service';
 
 @Component({
-  selector: 'app-aluno-list',
+  selector: 'app-disciplina-list',
   imports: [
     RouterLink,
-    DatePipe,
     ReactiveFormsModule,
     MatTableModule,
     MatPaginatorModule,
@@ -29,17 +27,24 @@ import { NotificationService } from '../../../../core/services/notification.serv
     MatFormFieldModule,
     MatInputModule,
   ],
-  templateUrl: './aluno-list.html',
-  styleUrl: './aluno-list.css',
+  templateUrl: './disciplina-list.html',
+  styleUrl: './disciplina-list.css',
 })
-export class AlunoList implements OnInit {
-  private readonly alunoService = inject(AlunoService);
+export class DisciplinaList implements OnInit {
+  private readonly disciplinaService = inject(DisciplinaService);
   private readonly dialog = inject(MatDialog);
   private readonly notifications = inject(NotificationService);
   private readonly destroyRef = inject(DestroyRef);
 
-  readonly displayedColumns = ['nome', 'email', 'cpf', 'dataNascimento', 'acoes'];
-  readonly alunos = signal<AlunoResponse[]>([]);
+  readonly displayedColumns = [
+    'nome',
+    'cursoNome',
+    'cargaHoraria',
+    'creditos',
+    'semestreRecomendado',
+    'acoes',
+  ];
+  readonly disciplinas = signal<DisciplinaResponse[]>([]);
   readonly totalElements = signal(0);
   readonly pageIndex = signal(0);
   readonly pageSize = signal(10);
@@ -66,7 +71,7 @@ export class AlunoList implements OnInit {
   }
 
   carregar(): void {
-    this.alunoService
+    this.disciplinaService
       .listar({
         page: this.pageIndex(),
         size: this.pageSize(),
@@ -75,26 +80,26 @@ export class AlunoList implements OnInit {
       })
       .subscribe({
         next: (page) => {
-          this.alunos.set(page.content ?? []);
+          this.disciplinas.set(page.content ?? []);
           this.totalElements.set(page.totalElements ?? 0);
           this.empty.set((page.content ?? []).length === 0);
         },
       });
   }
 
-  confirmarExclusao(aluno: AlunoResponse): void {
-    const ref = this.dialog.open(ConfirmExcluirAlunoDialog, {
+  confirmarExclusao(disciplina: DisciplinaResponse): void {
+    const ref = this.dialog.open(ConfirmExcluirDisciplinaDialog, {
       width: '400px',
-      data: { nome: aluno.nome },
+      data: { nome: disciplina.nome },
     });
 
     ref.afterClosed().subscribe((confirmed: boolean | undefined) => {
       if (!confirmed) {
         return;
       }
-      this.alunoService.excluir(aluno.id).subscribe({
+      this.disciplinaService.excluir(disciplina.id).subscribe({
         next: () => {
-          this.notifications.success('Aluno excluido com sucesso');
+          this.notifications.success('Disciplina excluida com sucesso');
           this.carregar();
         },
       });

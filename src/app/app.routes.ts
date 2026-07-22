@@ -42,6 +42,13 @@ export const routes: Routes = [
         loadChildren: () =>
           import('./features/cursos/cursos.routes').then((m) => m.CURSOS_ROUTES),
       },
+      {
+        path: 'disciplinas',
+        loadChildren: () =>
+          import('./features/disciplinas/disciplinas.routes').then(
+            (m) => m.DISCIPLINAS_ROUTES,
+          ),
+      },
     ],
   },
   { path: '**', redirectTo: 'login' },
