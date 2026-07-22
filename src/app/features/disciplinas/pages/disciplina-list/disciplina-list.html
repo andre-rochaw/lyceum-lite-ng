@@ -1,8 +1,8 @@
 <div class="flex flex-wrap items-center justify-between gap-4 mb-4">
-  <h1 class="text-xl font-medium m-0">Cursos</h1>
-  <a mat-flat-button color="primary" routerLink="/cursos/novo">
+  <h1 class="text-xl font-medium m-0">Disciplinas</h1>
+  <a mat-flat-button color="primary" routerLink="/disciplinas/novo">
     <mat-icon>add</mat-icon>
-    Novo curso
+    Nova disciplina
   </a>
 </div>
 
@@ -19,19 +19,34 @@
 </div>
 
 @if (empty()) {
-  <p class="text-sm opacity-70 mb-4">Nenhum curso cadastrado.</p>
+  <p class="text-sm opacity-70 mb-4">Nenhuma disciplina cadastrada.</p>
 }
 
 <div class="table-wrap">
-  <table mat-table [dataSource]="cursos()" class="w-full">
+  <table mat-table [dataSource]="disciplinas()" class="w-full">
     <ng-container matColumnDef="nome">
       <th mat-header-cell *matHeaderCellDef>Nome</th>
       <td mat-cell *matCellDef="let row">{{ row.nome }}</td>
     </ng-container>
 
-    <ng-container matColumnDef="descricao">
-      <th mat-header-cell *matHeaderCellDef>Descricao</th>
-      <td mat-cell *matCellDef="let row">{{ row.descricao || '?' }}</td>
+    <ng-container matColumnDef="cursoNome">
+      <th mat-header-cell *matHeaderCellDef>Curso</th>
+      <td mat-cell *matCellDef="let row">{{ row.cursoNome }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="cargaHoraria">
+      <th mat-header-cell *matHeaderCellDef>Carga</th>
+      <td mat-cell *matCellDef="let row">{{ row.cargaHoraria }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="creditos">
+      <th mat-header-cell *matHeaderCellDef>Creditos</th>
+      <td mat-cell *matCellDef="let row">{{ row.creditos }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="semestreRecomendado">
+      <th mat-header-cell *matHeaderCellDef>Semestre</th>
+      <td mat-cell *matCellDef="let row">{{ row.semestreRecomendado }}</td>
     </ng-container>
 
     <ng-container matColumnDef="acoes">
@@ -39,8 +54,8 @@
       <td mat-cell *matCellDef="let row">
         <a
           mat-icon-button
-          [routerLink]="['/cursos', row.id, 'editar']"
-          aria-label="Editar curso"
+          [routerLink]="['/disciplinas', row.id, 'editar']"
+          aria-label="Editar disciplina"
         >
           <mat-icon>edit</mat-icon>
         </a>
@@ -48,7 +63,7 @@
           mat-icon-button
           type="button"
           color="warn"
-          aria-label="Excluir curso"
+          aria-label="Excluir disciplina"
           (click)="confirmarExclusao(row)"
         >
           <mat-icon>delete</mat-icon>

@@ -1,0 +1,138 @@
+<div class="disciplina-form-page">
+  @if (loading()) {
+    <p class="text-sm opacity-70">Carregando disciplina...</p>
+  } @else {
+    <mat-card class="disciplina-form-card">
+      <mat-card-header>
+        <mat-card-title>
+          {{ isEdit() ? 'Editar disciplina' : 'Nova disciplina' }}
+        </mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <form class="disciplina-form" [formGroup]="form" (ngSubmit)="submit()">
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Nome</mat-label>
+            <input matInput formControlName="nome" autocomplete="off" />
+            @if (form.controls.nome.hasError('required')) {
+              <mat-error>Nome e obrigatorio</mat-error>
+            } @else if (form.controls.nome.hasError('minlength')) {
+              <mat-error>Minimo de 3 caracteres</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Descricao (opcional)</mat-label>
+            <textarea
+              matInput
+              formControlName="descricao"
+              rows="3"
+              maxlength="500"
+            ></textarea>
+            @if (form.controls.descricao.hasError('maxlength')) {
+              <mat-error>Maximo de 500 caracteres</mat-error>
+            }
+          </mat-form-field>
+
+          <div class="disciplina-form__row">
+            <mat-form-field appearance="outline" class="w-full">
+              <mat-label>Carga horaria</mat-label>
+              <input
+                matInput
+                type="number"
+                min="1"
+                formControlName="cargaHoraria"
+              />
+              @if (form.controls.cargaHoraria.hasError('required')) {
+                <mat-error>Carga horaria e obrigatoria</mat-error>
+              } @else if (form.controls.cargaHoraria.hasError('min')) {
+                <mat-error>Deve ser maior que zero</mat-error>
+              }
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="w-full">
+              <mat-label>Creditos</mat-label>
+              <input matInput type="number" min="1" formControlName="creditos" />
+              @if (form.controls.creditos.hasError('required')) {
+                <mat-error>Creditos sao obrigatorios</mat-error>
+              } @else if (form.controls.creditos.hasError('min')) {
+                <mat-error>Deve ser maior que zero</mat-error>
+              }
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="w-full">
+              <mat-label>Semestre recomendado</mat-label>
+              <input
+                matInput
+                type="number"
+                min="1"
+                formControlName="semestreRecomendado"
+              />
+              @if (form.controls.semestreRecomendado.hasError('required')) {
+                <mat-error>Semestre e obrigatorio</mat-error>
+              } @else if (form.controls.semestreRecomendado.hasError('min')) {
+                <mat-error>Deve ser maior que zero</mat-error>
+              }
+            </mat-form-field>
+          </div>
+
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Ementa</mat-label>
+            <textarea
+              matInput
+              formControlName="ementa"
+              rows="4"
+              maxlength="2000"
+            ></textarea>
+            @if (form.controls.ementa.hasError('required')) {
+              <mat-error>Ementa e obrigatoria</mat-error>
+            } @else if (form.controls.ementa.hasError('maxlength')) {
+              <mat-error>Maximo de 2000 caracteres</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Curso</mat-label>
+            <input
+              matInput
+              formControlName="cursoBusca"
+              [matAutocomplete]="cursoAuto"
+              autocomplete="off"
+            />
+            <mat-autocomplete
+              #cursoAuto="matAutocomplete"
+              [displayWith]="displayCurso"
+              (optionSelected)="onCursoSelected($event)"
+            >
+              @for (curso of cursosSugestoes(); track curso.id) {
+                <mat-option [value]="curso">{{ curso.nome }}</mat-option>
+              }
+              @if (emptyCursos()) {
+                <mat-option [value]="null">Nenhum curso encontrado</mat-option>
+              }
+            </mat-autocomplete>
+            @if (
+              form.controls.cursoBusca.hasError('required') ||
+              form.controls.cursoBusca.hasError('cursoNaoSelecionado') ||
+              (form.controls.cursoId.hasError('required') && form.controls.cursoBusca.touched)
+            ) {
+              <mat-error>Digite o nome de um curso para pesquisar</mat-error>
+            }
+            <mat-icon matSuffix>search</mat-icon>
+          </mat-form-field>
+
+          <div class="disciplina-form__actions">
+            <a mat-button routerLink="/disciplinas">Cancelar</a>
+            <button
+              mat-flat-button
+              color="primary"
+              type="submit"
+              [disabled]="submitting()"
+            >
+              Salvar
+            </button>
+          </div>
+        </form>
+      </mat-card-content>
+    </mat-card>
+  }
+</div>
