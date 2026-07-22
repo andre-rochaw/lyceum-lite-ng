@@ -12,6 +12,7 @@
 .search-field {
   width: 100%;
   max-width: 24rem;
+  flex: 1 1 16rem;
 }
 
 .table-wrap {

@@ -16,6 +16,31 @@
     />
     <mat-icon matSuffix>search</mat-icon>
   </mat-form-field>
+
+  <mat-form-field appearance="outline" class="search-field" subscriptSizing="dynamic">
+    <mat-label>Curso</mat-label>
+    <input
+      matInput
+      [formControl]="cursoBuscaControl"
+      [matAutocomplete]="cursoAuto"
+      placeholder="Filtrar por curso"
+      aria-label="Filtrar por curso"
+      autocomplete="off"
+    />
+    <mat-autocomplete
+      #cursoAuto="matAutocomplete"
+      [displayWith]="displayCurso"
+      (optionSelected)="onCursoSelected($event)"
+    >
+      @for (curso of cursosSugestoes(); track curso.id) {
+        <mat-option [value]="curso">{{ curso.nome }}</mat-option>
+      }
+      @if (emptyCursos()) {
+        <mat-option [value]="null">Nenhum curso encontrado</mat-option>
+      }
+    </mat-autocomplete>
+    <mat-icon matSuffix>search</mat-icon>
+  </mat-form-field>
 </div>
 
 @if (empty()) {

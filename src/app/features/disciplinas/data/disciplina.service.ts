@@ -24,6 +24,9 @@ export class DisciplinaService {
     if (query.nome?.trim()) {
       params = params.set('nome', query.nome.trim());
     }
+    if (query.cursoId?.trim()) {
+      params = params.set('cursoId', query.cursoId.trim());
+    }
     return this.http.get<PageResponse<DisciplinaResponse>>(this.baseUrl, { params });
   }
 
