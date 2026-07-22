@@ -21,6 +21,9 @@ export class AlunoService {
     if (query.sort) {
       params = params.set('sort', query.sort);
     }
+    if (query.nome?.trim()) {
+      params = params.set('nome', query.nome.trim());
+    }
     return this.http.get<PageResponse<AlunoResponse>>(this.baseUrl, { params });
   }
 

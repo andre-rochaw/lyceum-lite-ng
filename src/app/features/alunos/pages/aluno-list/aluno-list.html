@@ -6,6 +6,18 @@
   </a>
 </div>
 
+<div class="list-toolbar mb-4">
+  <mat-form-field appearance="outline" class="search-field" subscriptSizing="dynamic">
+    <input
+      matInput
+      [formControl]="buscaControl"
+      placeholder="Pesquisar por nome"
+      aria-label="Pesquisar por nome"
+    />
+    <mat-icon matSuffix>search</mat-icon>
+  </mat-form-field>
+</div>
+
 @if (empty()) {
   <p class="text-sm opacity-70 mb-4">Nenhum aluno cadastrado.</p>
 }
