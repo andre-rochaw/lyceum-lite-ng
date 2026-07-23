@@ -33,4 +33,5 @@ export interface DisciplinaPageQuery {
   size: number;
   sort?: string;
   nome?: string;
+  cursoId?: string;
 }

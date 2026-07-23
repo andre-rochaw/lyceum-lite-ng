@@ -1,0 +1,148 @@
+<div class="flex flex-wrap items-center justify-between gap-4 mb-4">
+  <h1 class="text-xl font-medium m-0">Matriculas</h1>
+  <a mat-flat-button color="primary" routerLink="/matriculas/novo">
+    <mat-icon>add</mat-icon>
+    Nova matricula
+  </a>
+</div>
+
+<form class="list-toolbar mb-4" [formGroup]="filtros" (ngSubmit)="aplicarFiltros()">
+  <mat-form-field appearance="outline" class="filter-field" subscriptSizing="dynamic">
+    <mat-label>Aluno</mat-label>
+    <input
+      matInput
+      formControlName="alunoBusca"
+      [matAutocomplete]="alunoAuto"
+      autocomplete="off"
+    />
+    <mat-autocomplete
+      #alunoAuto="matAutocomplete"
+      [displayWith]="displayAluno"
+      (optionSelected)="onAlunoSelected($event)"
+    >
+      @for (aluno of alunosSugestoes(); track aluno.id) {
+        <mat-option [value]="aluno">{{ aluno.nome }}</mat-option>
+      }
+      @if (emptyAlunos()) {
+        <mat-option [value]="null">Nenhum aluno encontrado</mat-option>
+      }
+    </mat-autocomplete>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="filter-field" subscriptSizing="dynamic">
+    <mat-label>Turma</mat-label>
+    <input
+      matInput
+      formControlName="turmaBusca"
+      [matAutocomplete]="turmaAuto"
+      autocomplete="off"
+    />
+    <mat-autocomplete
+      #turmaAuto="matAutocomplete"
+      [displayWith]="displayTurma"
+      (optionSelected)="onTurmaSelected($event)"
+    >
+      @for (turma of turmasSugestoes(); track turma.id) {
+        <mat-option [value]="turma">
+          {{ turma.nome }}
+          @if (turma.status) {
+            ({{ turma.status }})
+          }
+        </mat-option>
+      }
+      @if (emptyTurmas()) {
+        <mat-option [value]="null">Nenhuma turma encontrada</mat-option>
+      }
+    </mat-autocomplete>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="filter-field-sm" subscriptSizing="dynamic">
+    <mat-label>Status</mat-label>
+    <mat-select formControlName="status">
+      <mat-option [value]="null">Todos</mat-option>
+      @for (st of statusOptions; track st) {
+        <mat-option [value]="st">{{ st }}</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+
+  <div class="filter-actions">
+    <button mat-stroked-button type="submit">Filtrar</button>
+    <button mat-button type="button" (click)="limparFiltros()">Limpar</button>
+  </div>
+</form>
+
+@if (empty()) {
+  <p class="text-sm opacity-70 mb-4">Nenhuma matricula encontrada.</p>
+}
+
+<div class="table-wrap">
+  <table mat-table [dataSource]="matriculas()" class="w-full">
+    <ng-container matColumnDef="alunoNome">
+      <th mat-header-cell *matHeaderCellDef>Aluno</th>
+      <td mat-cell *matCellDef="let row">{{ row.alunoNome }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="turmaNome">
+      <th mat-header-cell *matHeaderCellDef>Turma</th>
+      <td mat-cell *matCellDef="let row">{{ row.turmaNome }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="disciplinaNome">
+      <th mat-header-cell *matHeaderCellDef>Disciplina</th>
+      <td mat-cell *matCellDef="let row">{{ row.disciplinaNome }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="cursoNome">
+      <th mat-header-cell *matHeaderCellDef>Curso</th>
+      <td mat-cell *matCellDef="let row">{{ row.cursoNome }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="status">
+      <th mat-header-cell *matHeaderCellDef>Status</th>
+      <td mat-cell *matCellDef="let row">{{ row.status }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="acoes">
+      <th mat-header-cell *matHeaderCellDef></th>
+      <td mat-cell *matCellDef="let row">
+        <div class="row-actions">
+          @if (podeConfirmar(row)) {
+            <button
+              mat-stroked-button
+              type="button"
+              color="primary"
+              [disabled]="actionInProgress()"
+              (click)="confirmar(row)"
+            >
+              Confirmar
+            </button>
+          }
+          @if (podeCancelar(row)) {
+            <button
+              mat-button
+              type="button"
+              color="warn"
+              [disabled]="actionInProgress()"
+              (click)="cancelar(row)"
+            >
+              Cancelar
+            </button>
+          }
+        </div>
+      </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+  </table>
+
+  <mat-paginator
+    [length]="totalElements()"
+    [pageIndex]="pageIndex()"
+    [pageSize]="pageSize()"
+    [pageSizeOptions]="[5, 10, 20]"
+    (page)="onPage($event)"
+    showFirstLastButtons
+  />
+</div>

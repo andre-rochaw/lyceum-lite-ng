@@ -1,0 +1,49 @@
+:host {
+  display: block;
+  min-height: calc(100dvh - 128px);
+}
+
+.matricula-form-page {
+  min-height: inherit;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  box-sizing: border-box;
+}
+
+.matricula-form-card {
+  width: min(100%, 640px);
+  box-sizing: border-box;
+}
+
+.matricula-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.turma-field-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.turma-field {
+  flex: 1 1 16rem;
+  min-width: 0;
+}
+
+.turma-search-btn {
+  margin-top: 0.25rem;
+}
+
+.matricula-form__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: flex-end;
+  margin-top: 0.5rem;
+}

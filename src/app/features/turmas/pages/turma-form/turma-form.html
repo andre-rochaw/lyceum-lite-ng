@@ -1,0 +1,136 @@
+<div class="turma-form-page">
+  @if (loading()) {
+    <p class="text-sm opacity-70">Carregando turma...</p>
+  } @else {
+    <mat-card class="turma-form-card">
+      <mat-card-header>
+        <mat-card-title>
+          {{ isEdit() ? 'Editar turma' : 'Nova turma' }}
+        </mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <form class="turma-form" [formGroup]="form" (ngSubmit)="submit()">
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Nome</mat-label>
+            <input matInput formControlName="nome" autocomplete="off" />
+            @if (form.controls.nome.hasError('required')) {
+              <mat-error>Nome e obrigatorio</mat-error>
+            } @else if (form.controls.nome.hasError('minlength')) {
+              <mat-error>Minimo de 3 caracteres</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Disciplina</mat-label>
+            <input
+              matInput
+              formControlName="disciplinaBusca"
+              [matAutocomplete]="disciplinaAuto"
+              autocomplete="off"
+            />
+            <mat-autocomplete
+              #disciplinaAuto="matAutocomplete"
+              [displayWith]="displayDisciplina"
+              (optionSelected)="onDisciplinaSelected($event)"
+            >
+              @for (disciplina of disciplinasSugestoes(); track disciplina.id) {
+                <mat-option [value]="disciplina">
+                  {{ disciplina.nome }}
+                  @if (disciplina.cursoNome) {
+                    ({{ disciplina.cursoNome }})
+                  }
+                </mat-option>
+              }
+              @if (emptyDisciplinas()) {
+                <mat-option [value]="null">Nenhuma disciplina encontrada</mat-option>
+              }
+            </mat-autocomplete>
+            @if (
+              form.controls.disciplinaBusca.hasError('required') ||
+              form.controls.disciplinaBusca.hasError('disciplinaNaoSelecionada') ||
+              (form.controls.disciplinaId.hasError('required') &&
+                form.controls.disciplinaBusca.touched)
+            ) {
+              <mat-error>Digite o nome de uma disciplina para pesquisar</mat-error>
+            }
+            <mat-icon matSuffix>search</mat-icon>
+          </mat-form-field>
+
+          @if (isEdit() && cursoNome()) {
+            <p class="text-sm opacity-70 turma-form__hint">
+              Curso: {{ cursoNome() }}
+            </p>
+          }
+
+          <div class="turma-form__row">
+            <mat-form-field appearance="outline" class="w-full">
+              <mat-label>Ano</mat-label>
+              <input matInput type="number" min="1" formControlName="ano" />
+              @if (form.controls.ano.hasError('required')) {
+                <mat-error>Ano e obrigatorio</mat-error>
+              } @else if (form.controls.ano.hasError('min')) {
+                <mat-error>Deve ser maior que zero</mat-error>
+              }
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="w-full">
+              <mat-label>Semestre</mat-label>
+              <input matInput type="number" min="1" formControlName="semestre" />
+              @if (form.controls.semestre.hasError('required')) {
+                <mat-error>Semestre e obrigatorio</mat-error>
+              } @else if (form.controls.semestre.hasError('min')) {
+                <mat-error>Deve ser maior que zero</mat-error>
+              }
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="w-full">
+              <mat-label>Limite de vagas</mat-label>
+              <input matInput type="number" min="1" formControlName="limiteVagas" />
+              @if (form.controls.limiteVagas.hasError('required')) {
+                <mat-error>Limite de vagas e obrigatorio</mat-error>
+              } @else if (form.controls.limiteVagas.hasError('min')) {
+                <mat-error>Deve ser maior que zero</mat-error>
+              }
+            </mat-form-field>
+          </div>
+
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Status</mat-label>
+            <mat-select formControlName="status">
+              @for (st of statusOptions; track st) {
+                <mat-option [value]="st">{{ st }}</mat-option>
+              }
+            </mat-select>
+            @if (form.controls.status.hasError('required')) {
+              <mat-error>Status e obrigatorio</mat-error>
+            }
+          </mat-form-field>
+
+          @if (isEdit() && vagasOcupadas() !== null) {
+            <mat-form-field appearance="outline" class="w-full">
+              <mat-label>Vagas ocupadas</mat-label>
+              <input
+                matInput
+                [value]="vagasOcupadas()"
+                disabled
+                readonly
+              />
+            </mat-form-field>
+          }
+
+          <div class="turma-form__actions">
+            <a mat-button routerLink="/turmas">Cancelar</a>
+            <button
+              mat-flat-button
+              color="primary"
+              type="submit"
+              [disabled]="submitting()"
+            >
+              Salvar
+            </button>
+          </div>
+        </form>
+      </mat-card-content>
+    </mat-card>
+  }
+</div>
