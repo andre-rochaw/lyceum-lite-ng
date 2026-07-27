@@ -5,6 +5,7 @@
 .picker-content {
   min-width: min(92vw, 920px);
   max-width: 960px;
+  padding: 0.5rem;
 }
 
 .picker-filters {
@@ -13,6 +14,7 @@
   align-items: flex-start;
   gap: 0.75rem;
   margin-bottom: 1rem;
+  padding: 0.5rem;
 }
 
 .picker-field {
@@ -38,6 +40,7 @@
   margin: 0 0 0.75rem;
   font-size: 0.875rem;
   opacity: 0.7;
+  padding: 0.5rem;
 }
 
 .picker-table-wrap {

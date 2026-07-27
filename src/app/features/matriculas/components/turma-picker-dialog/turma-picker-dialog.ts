@@ -6,6 +6,7 @@ import {
   MatAutocompleteSelectedEvent,
 } from '@angular/material/autocomplete';
 import { MatButtonModule } from '@angular/material/button';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 import {
   MatDialogActions,
   MatDialogContent,
@@ -51,12 +52,15 @@ export interface TurmaPickerResult {
     MatTableModule,
     MatPaginatorModule,
     MatProgressSpinnerModule,
+    MatCheckboxModule,
   ],
   templateUrl: './turma-picker-dialog.html',
   styleUrl: './turma-picker-dialog.css',
 })
 export class TurmaPickerDialog implements OnInit {
-  private readonly dialogRef = inject(MatDialogRef<TurmaPickerDialog, TurmaPickerResult | undefined>);
+  private readonly dialogRef = inject(
+    MatDialogRef<TurmaPickerDialog, TurmaPickerResult | undefined>,
+  );
   private readonly turmaService = inject(TurmaService);
   private readonly disciplinaService = inject(DisciplinaService);
   private readonly cursoService = inject(CursoService);
@@ -64,6 +68,7 @@ export class TurmaPickerDialog implements OnInit {
   private readonly fb = inject(FormBuilder);
 
   readonly displayedColumns = [
+    'selecao',
     'nome',
     'disciplinaNome',
     'cursoNome',
@@ -71,7 +76,6 @@ export class TurmaPickerDialog implements OnInit {
     'semestre',
     'status',
     'vagas',
-    'acoes',
   ];
   readonly turmas = signal<TurmaResponse[]>([]);
   readonly totalElements = signal(0);
@@ -79,6 +83,8 @@ export class TurmaPickerDialog implements OnInit {
   readonly pageSize = signal(10);
   readonly empty = signal(false);
   readonly loading = signal(false);
+  readonly cursoSelecionado = signal(false);
+  readonly turmaSelecionada = signal<TurmaResponse | null>(null);
 
   readonly cursosSugestoes = signal<CursoResponse[]>([]);
   readonly emptyCursos = signal(false);
@@ -91,9 +97,9 @@ export class TurmaPickerDialog implements OnInit {
   readonly filtros = this.fb.nonNullable.group({
     cursoBusca: [''],
     cursoId: [null as string | null],
-    disciplinaBusca: [''],
+    disciplinaBusca: [{ value: '', disabled: true }],
     disciplinaId: [null as string | null],
-    nome: [''],
+    nome: [{ value: '', disabled: true }],
   });
 
   ngOnInit(): void {
@@ -141,6 +147,10 @@ export class TurmaPickerDialog implements OnInit {
           if (termo && typeof termo === 'object' && 'id' in termo) {
             return of(null);
           }
+          if (!this.filtros.controls.cursoId.value) {
+            this.disciplinasSugestoes.set([]);
+            return of(null);
+          }
           const trimmed = String(termo ?? '').trim();
           if (
             this.selectedDisciplinaNome !== null &&
@@ -173,8 +183,6 @@ export class TurmaPickerDialog implements OnInit {
           this.disciplinasSugestoes.set(result.content ?? []);
         },
       });
-
-    this.carregar();
   }
 
   onPage(event: PageEvent): void {
@@ -185,16 +193,22 @@ export class TurmaPickerDialog implements OnInit {
 
   aplicarFiltros(): void {
     this.pageIndex.set(0);
+    this.turmaSelecionada.set(null);
     this.carregar();
   }
 
   limparFiltros(): void {
     this.selectedCursoNome = null;
     this.selectedDisciplinaNome = null;
+    this.turmaSelecionada.set(null);
     this.cursosSugestoes.set([]);
     this.disciplinasSugestoes.set([]);
     this.emptyCursos.set(false);
     this.emptyDisciplinas.set(false);
+    this.cursoSelecionado.set(false);
+    this.turmas.set([]);
+    this.totalElements.set(0);
+    this.empty.set(false);
     this.filtros.reset({
       cursoBusca: '',
       cursoId: null,
@@ -202,8 +216,9 @@ export class TurmaPickerDialog implements OnInit {
       disciplinaId: null,
       nome: '',
     });
+    this.filtros.controls.disciplinaBusca.disable({ emitEvent: false });
+    this.filtros.controls.nome.disable({ emitEvent: false });
     this.pageIndex.set(0);
-    this.carregar();
   }
 
   onCursoSelected(event: MatAutocompleteSelectedEvent): void {
@@ -216,6 +231,12 @@ export class TurmaPickerDialog implements OnInit {
     this.filtros.controls.cursoId.setValue(curso.id);
     this.filtros.controls.cursoBusca.setValue(curso.nome, { emitEvent: false });
     this.limparDisciplinaSelecionada();
+    this.filtros.controls.disciplinaBusca.enable({ emitEvent: false });
+    this.filtros.controls.nome.enable({ emitEvent: false });
+    this.cursoSelecionado.set(true);
+    this.turmaSelecionada.set(null);
+    this.pageIndex.set(0);
+    this.carregar();
   }
 
   onDisciplinaSelected(event: MatAutocompleteSelectedEvent): void {
@@ -229,6 +250,9 @@ export class TurmaPickerDialog implements OnInit {
     this.filtros.controls.disciplinaBusca.setValue(disciplina.nome, {
       emitEvent: false,
     });
+    this.turmaSelecionada.set(null);
+    this.pageIndex.set(0);
+    this.carregar();
   }
 
   displayCurso = (value: string | CursoResponse | null): string => {
@@ -251,7 +275,33 @@ export class TurmaPickerDialog implements OnInit {
     return value.nome;
   };
 
+  isTurmaSelecionada(turma: TurmaResponse): boolean {
+    return this.turmaSelecionada()?.id === turma.id;
+  }
+
+  onTurmaCheck(turma: TurmaResponse, checked: boolean): void {
+    if (!checked) {
+      this.turmaSelecionada.set(null);
+      return;
+    }
+    this.turmaSelecionada.set(turma);
+    this.dialogRef.close({
+      turmaId: turma.id,
+      turmaNome: turma.nome,
+    });
+  }
+
   carregar(): void {
+    const cursoId = this.filtros.controls.cursoId.value;
+    if (!cursoId) {
+      this.cursoSelecionado.set(false);
+      this.turmas.set([]);
+      this.totalElements.set(0);
+      this.empty.set(false);
+      return;
+    }
+
+    this.cursoSelecionado.set(true);
     const raw = this.filtros.getRawValue();
     this.loading.set(true);
     this.turmaService
@@ -261,7 +311,7 @@ export class TurmaPickerDialog implements OnInit {
         sort: 'nome',
         nome: raw.nome.trim() || undefined,
         disciplinaId: raw.disciplinaId || undefined,
-        cursoId: raw.cursoId || undefined,
+        cursoId,
         status: 'ABERTA',
       })
       .subscribe({
@@ -277,13 +327,6 @@ export class TurmaPickerDialog implements OnInit {
       });
   }
 
-  selecionar(turma: TurmaResponse): void {
-    this.dialogRef.close({
-      turmaId: turma.id,
-      turmaNome: turma.nome,
-    });
-  }
-
   fechar(): void {
     this.dialogRef.close(undefined);
   }
@@ -291,6 +334,13 @@ export class TurmaPickerDialog implements OnInit {
   private limparCursoSelecionado(resetBusca: boolean): void {
     this.filtros.controls.cursoId.setValue(null);
     this.selectedCursoNome = null;
+    this.cursoSelecionado.set(false);
+    this.turmaSelecionada.set(null);
+    this.turmas.set([]);
+    this.totalElements.set(0);
+    this.empty.set(false);
+    this.filtros.controls.disciplinaBusca.disable({ emitEvent: false });
+    this.filtros.controls.nome.disable({ emitEvent: false });
     if (resetBusca) {
       this.filtros.controls.cursoBusca.setValue('', { emitEvent: false });
     }

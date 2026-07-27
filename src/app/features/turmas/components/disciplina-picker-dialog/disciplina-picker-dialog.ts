@@ -192,7 +192,16 @@ export class DisciplinaPickerDialog implements OnInit {
   }
 
   onDisciplinaCheck(disciplina: DisciplinaResponse, checked: boolean): void {
-    this.disciplinaSelecionada.set(checked ? disciplina : null);
+    if (!checked) {
+      this.disciplinaSelecionada.set(null);
+      return;
+    }
+    this.disciplinaSelecionada.set(disciplina);
+    this.dialogRef.close({
+      disciplinaId: disciplina.id,
+      disciplinaNome: disciplina.nome,
+      cursoNome: disciplina.cursoNome ?? null,
+    });
   }
 
   carregar(): void {
@@ -227,18 +236,6 @@ export class DisciplinaPickerDialog implements OnInit {
           this.loading.set(false);
         },
       });
-  }
-
-  confirmar(): void {
-    const disciplina = this.disciplinaSelecionada();
-    if (!disciplina?.id) {
-      return;
-    }
-    this.dialogRef.close({
-      disciplinaId: disciplina.id,
-      disciplinaNome: disciplina.nome,
-      cursoNome: disciplina.cursoNome ?? null,
-    });
   }
 
   fechar(): void {
