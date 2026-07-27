@@ -1,27 +1,22 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import {
   FormBuilder,
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
-import { MatAutocompleteModule, MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
+import { MatDialog } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import {
-  debounceTime,
-  distinctUntilChanged,
-  of,
-  switchMap,
-} from 'rxjs';
-import { DisciplinaService } from '../../../disciplinas/data/disciplina.service';
-import { DisciplinaResponse } from '../../../disciplinas/models/disciplina.models';
+  DisciplinaPickerDialog,
+  DisciplinaPickerResult,
+} from '../../components/disciplina-picker-dialog/disciplina-picker-dialog';
 import { TurmaService } from '../../data/turma.service';
 import {
   STATUS_TURMA_OPTIONS,
@@ -39,7 +34,6 @@ import { NotificationService } from '../../../../core/services/notification.serv
     MatFormFieldModule,
     MatInputModule,
     MatButtonModule,
-    MatAutocompleteModule,
     MatIconModule,
     MatSelectModule,
   ],
@@ -49,27 +43,22 @@ import { NotificationService } from '../../../../core/services/notification.serv
 export class TurmaForm implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly turmaService = inject(TurmaService);
-  private readonly disciplinaService = inject(DisciplinaService);
+  private readonly dialog = inject(MatDialog);
   private readonly notifications = inject(NotificationService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
-  private readonly destroyRef = inject(DestroyRef);
 
   readonly statusOptions = STATUS_TURMA_OPTIONS;
   readonly turmaId = signal<string | null>(null);
   readonly isEdit = signal(false);
   readonly submitting = signal(false);
   readonly loading = signal(false);
-  readonly disciplinasSugestoes = signal<DisciplinaResponse[]>([]);
-  readonly emptyDisciplinas = signal(false);
   readonly vagasOcupadas = signal<number | null>(null);
   readonly cursoNome = signal<string | null>(null);
 
-  private selectedDisciplinaNome: string | null = null;
-
   readonly form = this.fb.nonNullable.group({
     nome: ['', [Validators.required, Validators.minLength(3)]],
-    disciplinaBusca: ['', Validators.required],
+    disciplinaNome: ['', Validators.required],
     disciplinaId: [null as string | null, Validators.required],
     ano: [null as number | null, [Validators.required, Validators.min(1)]],
     semestre: [null as number | null, [Validators.required, Validators.min(1)]],
@@ -78,46 +67,6 @@ export class TurmaForm implements OnInit {
   });
 
   ngOnInit(): void {
-    this.form.controls.disciplinaBusca.valueChanges
-      .pipe(
-        debounceTime(300),
-        distinctUntilChanged(),
-        switchMap((termo) => {
-          if (termo && typeof termo === 'object' && 'id' in termo) {
-            return of(null);
-          }
-          const trimmed = String(termo ?? '').trim();
-          if (
-            this.selectedDisciplinaNome !== null &&
-            trimmed !== this.selectedDisciplinaNome
-          ) {
-            this.form.controls.disciplinaId.setValue(null);
-            this.selectedDisciplinaNome = null;
-          }
-          if (trimmed.length < 1) {
-            this.disciplinasSugestoes.set([]);
-            return of(null);
-          }
-          return this.disciplinaService.listar({
-            nome: trimmed,
-            page: 0,
-            size: 10,
-            sort: 'nome',
-          });
-        }),
-        takeUntilDestroyed(this.destroyRef),
-      )
-      .subscribe({
-        next: (result) => {
-          if (result == null || result.content.length === 0) {
-            this.emptyDisciplinas.set(true);
-            return;
-          }
-          this.emptyDisciplinas.set(false);
-          this.disciplinasSugestoes.set(result.content ?? []);
-        },
-      });
-
     const id = this.route.snapshot.paramMap.get('id');
     if (!id) {
       return;
@@ -127,12 +76,11 @@ export class TurmaForm implements OnInit {
     this.loading.set(true);
     this.turmaService.buscarPorId(id).subscribe({
       next: (turma) => {
-        this.selectedDisciplinaNome = turma.disciplinaNome;
         this.vagasOcupadas.set(turma.vagasOcupadas);
         this.cursoNome.set(turma.cursoNome);
         this.form.patchValue({
           nome: turma.nome,
-          disciplinaBusca: turma.disciplinaNome,
+          disciplinaNome: turma.disciplinaNome,
           disciplinaId: turma.disciplinaId,
           ano: turma.ano,
           semestre: turma.semestre,
@@ -150,37 +98,36 @@ export class TurmaForm implements OnInit {
     });
   }
 
-  onDisciplinaSelected(event: MatAutocompleteSelectedEvent): void {
-    const disciplina = event.option.value as DisciplinaResponse | null;
-    if (!disciplina?.id) {
-      return;
-    }
-    this.selectedDisciplinaNome = disciplina.nome;
-    this.emptyDisciplinas.set(false);
-    this.form.controls.disciplinaId.setValue(disciplina.id);
-    this.form.controls.disciplinaBusca.setValue(disciplina.nome, {
-      emitEvent: false,
+  abrirBuscaDisciplina(): void {
+    const ref = this.dialog.open(DisciplinaPickerDialog, {
+      width: '960px',
+      maxWidth: '96vw',
+      autoFocus: 'first-heading',
     });
-    this.form.controls.disciplinaBusca.updateValueAndValidity({
-      emitEvent: false,
+
+    ref.afterClosed().subscribe((result: DisciplinaPickerResult | undefined) => {
+      if (!result?.disciplinaId) {
+        return;
+      }
+      this.form.controls.disciplinaId.setValue(result.disciplinaId);
+      this.form.controls.disciplinaNome.setValue(result.disciplinaNome);
+      this.cursoNome.set(result.cursoNome);
+      this.form.controls.disciplinaNome.updateValueAndValidity();
+      this.form.controls.disciplinaId.updateValueAndValidity();
     });
   }
 
-  displayDisciplina = (value: string | DisciplinaResponse | null): string => {
-    if (value == null) {
-      return '';
-    }
-    if (typeof value === 'string') {
-      return value;
-    }
-    return value.nome;
-  };
+  limparDisciplina(): void {
+    this.form.controls.disciplinaId.setValue(null);
+    this.form.controls.disciplinaNome.setValue('');
+    this.cursoNome.set(null);
+  }
 
   submit(): void {
     if (this.form.invalid || !this.form.controls.disciplinaId.value) {
       this.form.markAllAsTouched();
       if (!this.form.controls.disciplinaId.value) {
-        this.form.controls.disciplinaBusca.setErrors({
+        this.form.controls.disciplinaNome.setErrors({
           disciplinaNaoSelecionada: true,
         });
       }

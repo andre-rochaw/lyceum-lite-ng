@@ -1,0 +1,122 @@
+<h2 mat-dialog-title>Buscar disciplina</h2>
+
+<mat-dialog-content class="picker-content">
+  <form class="picker-filters" [formGroup]="filtros" (ngSubmit)="aplicarFiltros()">
+    <mat-form-field appearance="outline" class="picker-field" subscriptSizing="dynamic">
+      <mat-label>Curso</mat-label>
+      <input
+        matInput
+        formControlName="cursoBusca"
+        [matAutocomplete]="cursoAuto"
+        autocomplete="off"
+      />
+      <mat-autocomplete
+        #cursoAuto="matAutocomplete"
+        [displayWith]="displayCurso"
+        (optionSelected)="onCursoSelected($event)"
+      >
+        @for (curso of cursosSugestoes(); track curso.id) {
+          <mat-option [value]="curso">{{ curso.nome }}</mat-option>
+        }
+        @if (emptyCursos()) {
+          <mat-option [value]="null">Nenhum curso encontrado</mat-option>
+        }
+      </mat-autocomplete>
+      <mat-icon matSuffix>search</mat-icon>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="picker-field" subscriptSizing="dynamic">
+      <mat-label>Nome da disciplina</mat-label>
+      <input matInput formControlName="nome" autocomplete="off" />
+      <mat-icon matSuffix>search</mat-icon>
+    </mat-form-field>
+
+    <div class="picker-filter-actions">
+      <button
+        mat-stroked-button
+        type="submit"
+        [disabled]="!cursoSelecionado()"
+      >
+        Pesquisar
+      </button>
+      <button mat-button type="button" (click)="limparFiltros()">Limpar</button>
+    </div>
+  </form>
+
+  @if (!cursoSelecionado()) {
+    <p class="picker-empty">Selecione um curso para listar as disciplinas.</p>
+  } @else if (loading()) {
+    <div class="picker-loading">
+      <mat-progress-spinner diameter="36" mode="indeterminate" />
+    </div>
+  } @else if (empty()) {
+    <p class="picker-empty">Nenhuma disciplina encontrada.</p>
+  }
+
+  @if (cursoSelecionado()) {
+    <div class="picker-table-wrap">
+      <table mat-table [dataSource]="disciplinas()" class="w-full">
+        <ng-container matColumnDef="selecao">
+          <th mat-header-cell *matHeaderCellDef></th>
+          <td mat-cell *matCellDef="let row">
+            <mat-checkbox
+              [checked]="isDisciplinaSelecionada(row)"
+              (change)="onDisciplinaCheck(row, $event.checked)"
+              aria-label="Selecionar disciplina"
+            />
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="nome">
+          <th mat-header-cell *matHeaderCellDef>Disciplina</th>
+          <td mat-cell *matCellDef="let row">{{ row.nome }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="cursoNome">
+          <th mat-header-cell *matHeaderCellDef>Curso</th>
+          <td mat-cell *matCellDef="let row">{{ row.cursoNome }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="cargaHoraria">
+          <th mat-header-cell *matHeaderCellDef>Carga horaria</th>
+          <td mat-cell *matCellDef="let row">{{ row.cargaHoraria }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="creditos">
+          <th mat-header-cell *matHeaderCellDef>Creditos</th>
+          <td mat-cell *matCellDef="let row">{{ row.creditos }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="semestreRecomendado">
+          <th mat-header-cell *matHeaderCellDef>Semestre</th>
+          <td mat-cell *matCellDef="let row">{{ row.semestreRecomendado }}</td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+      </table>
+
+      <mat-paginator
+        [length]="totalElements()"
+        [pageIndex]="pageIndex()"
+        [pageSize]="pageSize()"
+        [pageSizeOptions]="[5, 10, 20]"
+        (page)="onPage($event)"
+        showFirstLastButtons
+      />
+    </div>
+  }
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button type="button" (click)="fechar()">Fechar</button>
+  <button
+    mat-flat-button
+    color="primary"
+    type="button"
+    [disabled]="!disciplinaSelecionada()"
+    (click)="confirmar()"
+  >
+    Selecionar
+  </button>
+</mat-dialog-actions>

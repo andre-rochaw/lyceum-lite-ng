@@ -20,43 +20,50 @@
             }
           </mat-form-field>
 
-          <mat-form-field appearance="outline" class="w-full">
-            <mat-label>Disciplina</mat-label>
-            <input
-              matInput
-              formControlName="disciplinaBusca"
-              [matAutocomplete]="disciplinaAuto"
-              autocomplete="off"
-            />
-            <mat-autocomplete
-              #disciplinaAuto="matAutocomplete"
-              [displayWith]="displayDisciplina"
-              (optionSelected)="onDisciplinaSelected($event)"
-            >
-              @for (disciplina of disciplinasSugestoes(); track disciplina.id) {
-                <mat-option [value]="disciplina">
-                  {{ disciplina.nome }}
-                  @if (disciplina.cursoNome) {
-                    ({{ disciplina.cursoNome }})
-                  }
-                </mat-option>
+          <div class="disciplina-field-row">
+            <mat-form-field appearance="outline" class="disciplina-field">
+              <mat-label>Disciplina</mat-label>
+              <input
+                matInput
+                formControlName="disciplinaNome"
+                readonly
+                autocomplete="off"
+                placeholder="Nenhuma disciplina selecionada"
+              />
+              @if (
+                form.controls.disciplinaNome.hasError('required') ||
+                form.controls.disciplinaNome.hasError('disciplinaNaoSelecionada') ||
+                (form.controls.disciplinaId.hasError('required') &&
+                  form.controls.disciplinaNome.touched)
+              ) {
+                <mat-error>Selecione uma disciplina pela busca avancada</mat-error>
               }
-              @if (emptyDisciplinas()) {
-                <mat-option [value]="null">Nenhuma disciplina encontrada</mat-option>
+              @if (form.controls.disciplinaId.value) {
+                <button
+                  matSuffix
+                  mat-icon-button
+                  type="button"
+                  aria-label="Limpar disciplina"
+                  (click)="limparDisciplina()"
+                >
+                  <mat-icon>close</mat-icon>
+                </button>
               }
-            </mat-autocomplete>
-            @if (
-              form.controls.disciplinaBusca.hasError('required') ||
-              form.controls.disciplinaBusca.hasError('disciplinaNaoSelecionada') ||
-              (form.controls.disciplinaId.hasError('required') &&
-                form.controls.disciplinaBusca.touched)
-            ) {
-              <mat-error>Digite o nome de uma disciplina para pesquisar</mat-error>
-            }
-            <mat-icon matSuffix>search</mat-icon>
-          </mat-form-field>
+            </mat-form-field>
 
-          @if (isEdit() && cursoNome()) {
+            <button
+              mat-stroked-button
+              color="primary"
+              type="button"
+              class="disciplina-search-btn"
+              (click)="abrirBuscaDisciplina()"
+            >
+              <mat-icon>search</mat-icon>
+              Buscar disciplina
+            </button>
+          </div>
+
+          @if (cursoNome()) {
             <p class="text-sm opacity-70 turma-form__hint">
               Curso: {{ cursoNome() }}
             </p>
