@@ -29,16 +29,15 @@ import { CursoService } from '../../../cursos/data/curso.service';
 import { CursoResponse } from '../../../cursos/models/curso.models';
 import { DisciplinaService } from '../../../disciplinas/data/disciplina.service';
 import { DisciplinaResponse } from '../../../disciplinas/models/disciplina.models';
-import { TurmaService } from '../../../turmas/data/turma.service';
-import { TurmaResponse } from '../../../turmas/models/turma.models';
 
-export interface TurmaPickerResult {
-  turmaId: string;
-  turmaNome: string;
+export interface DisciplinaPickerResult {
+  disciplinaId: string;
+  disciplinaNome: string;
+  cursoNome: string | null;
 }
 
 @Component({
-  selector: 'app-turma-picker-dialog',
+  selector: 'app-disciplina-picker-dialog',
   imports: [
     ReactiveFormsModule,
     MatDialogTitle,
@@ -54,14 +53,13 @@ export interface TurmaPickerResult {
     MatProgressSpinnerModule,
     MatCheckboxModule,
   ],
-  templateUrl: './turma-picker-dialog.html',
-  styleUrl: './turma-picker-dialog.css',
+  templateUrl: './disciplina-picker-dialog.html',
+  styleUrl: './disciplina-picker-dialog.css',
 })
-export class TurmaPickerDialog implements OnInit {
+export class DisciplinaPickerDialog implements OnInit {
   private readonly dialogRef = inject(
-    MatDialogRef<TurmaPickerDialog, TurmaPickerResult | undefined>,
+    MatDialogRef<DisciplinaPickerDialog, DisciplinaPickerResult | undefined>,
   );
-  private readonly turmaService = inject(TurmaService);
   private readonly disciplinaService = inject(DisciplinaService);
   private readonly cursoService = inject(CursoService);
   private readonly destroyRef = inject(DestroyRef);
@@ -70,35 +68,28 @@ export class TurmaPickerDialog implements OnInit {
   readonly displayedColumns = [
     'selecao',
     'nome',
-    'disciplinaNome',
     'cursoNome',
-    'ano',
-    'semestre',
-    'status',
-    'vagas',
+    'cargaHoraria',
+    'creditos',
+    'semestreRecomendado',
   ];
-  readonly turmas = signal<TurmaResponse[]>([]);
+  readonly disciplinas = signal<DisciplinaResponse[]>([]);
   readonly totalElements = signal(0);
   readonly pageIndex = signal(0);
   readonly pageSize = signal(10);
   readonly empty = signal(false);
   readonly loading = signal(false);
   readonly cursoSelecionado = signal(false);
-  readonly turmaSelecionada = signal<TurmaResponse | null>(null);
 
   readonly cursosSugestoes = signal<CursoResponse[]>([]);
   readonly emptyCursos = signal(false);
-  readonly disciplinasSugestoes = signal<DisciplinaResponse[]>([]);
-  readonly emptyDisciplinas = signal(false);
+  readonly disciplinaSelecionada = signal<DisciplinaResponse | null>(null);
 
   private selectedCursoNome: string | null = null;
-  private selectedDisciplinaNome: string | null = null;
 
   readonly filtros = this.fb.nonNullable.group({
     cursoBusca: [''],
     cursoId: [null as string | null],
-    disciplinaBusca: [{ value: '', disabled: true }],
-    disciplinaId: [null as string | null],
     nome: [{ value: '', disabled: true }],
   });
 
@@ -138,51 +129,6 @@ export class TurmaPickerDialog implements OnInit {
           this.cursosSugestoes.set(result.content ?? []);
         },
       });
-
-    this.filtros.controls.disciplinaBusca.valueChanges
-      .pipe(
-        debounceTime(300),
-        distinctUntilChanged(),
-        switchMap((termo) => {
-          if (termo && typeof termo === 'object' && 'id' in termo) {
-            return of(null);
-          }
-          if (!this.filtros.controls.cursoId.value) {
-            this.disciplinasSugestoes.set([]);
-            return of(null);
-          }
-          const trimmed = String(termo ?? '').trim();
-          if (
-            this.selectedDisciplinaNome !== null &&
-            trimmed !== this.selectedDisciplinaNome
-          ) {
-            this.filtros.controls.disciplinaId.setValue(null);
-            this.selectedDisciplinaNome = null;
-          }
-          if (trimmed.length < 1) {
-            this.disciplinasSugestoes.set([]);
-            return of(null);
-          }
-          return this.disciplinaService.listar({
-            nome: trimmed,
-            page: 0,
-            size: 10,
-            sort: 'nome',
-            cursoId: this.filtros.controls.cursoId.value || undefined,
-          });
-        }),
-        takeUntilDestroyed(this.destroyRef),
-      )
-      .subscribe({
-        next: (result) => {
-          if (result == null || result.content.length === 0) {
-            this.emptyDisciplinas.set(true);
-            return;
-          }
-          this.emptyDisciplinas.set(false);
-          this.disciplinasSugestoes.set(result.content ?? []);
-        },
-      });
   }
 
   onPage(event: PageEvent): void {
@@ -193,30 +139,24 @@ export class TurmaPickerDialog implements OnInit {
 
   aplicarFiltros(): void {
     this.pageIndex.set(0);
-    this.turmaSelecionada.set(null);
+    this.disciplinaSelecionada.set(null);
     this.carregar();
   }
 
   limparFiltros(): void {
     this.selectedCursoNome = null;
-    this.selectedDisciplinaNome = null;
-    this.turmaSelecionada.set(null);
+    this.disciplinaSelecionada.set(null);
     this.cursosSugestoes.set([]);
-    this.disciplinasSugestoes.set([]);
     this.emptyCursos.set(false);
-    this.emptyDisciplinas.set(false);
     this.cursoSelecionado.set(false);
-    this.turmas.set([]);
+    this.disciplinas.set([]);
     this.totalElements.set(0);
     this.empty.set(false);
     this.filtros.reset({
       cursoBusca: '',
       cursoId: null,
-      disciplinaBusca: '',
-      disciplinaId: null,
       nome: '',
     });
-    this.filtros.controls.disciplinaBusca.disable({ emitEvent: false });
     this.filtros.controls.nome.disable({ emitEvent: false });
     this.pageIndex.set(0);
   }
@@ -230,27 +170,9 @@ export class TurmaPickerDialog implements OnInit {
     this.emptyCursos.set(false);
     this.filtros.controls.cursoId.setValue(curso.id);
     this.filtros.controls.cursoBusca.setValue(curso.nome, { emitEvent: false });
-    this.limparDisciplinaSelecionada();
-    this.filtros.controls.disciplinaBusca.enable({ emitEvent: false });
     this.filtros.controls.nome.enable({ emitEvent: false });
     this.cursoSelecionado.set(true);
-    this.turmaSelecionada.set(null);
-    this.pageIndex.set(0);
-    this.carregar();
-  }
-
-  onDisciplinaSelected(event: MatAutocompleteSelectedEvent): void {
-    const disciplina = event.option.value as DisciplinaResponse | null;
-    if (!disciplina?.id) {
-      return;
-    }
-    this.selectedDisciplinaNome = disciplina.nome;
-    this.emptyDisciplinas.set(false);
-    this.filtros.controls.disciplinaId.setValue(disciplina.id);
-    this.filtros.controls.disciplinaBusca.setValue(disciplina.nome, {
-      emitEvent: false,
-    });
-    this.turmaSelecionada.set(null);
+    this.disciplinaSelecionada.set(null);
     this.pageIndex.set(0);
     this.carregar();
   }
@@ -265,29 +187,20 @@ export class TurmaPickerDialog implements OnInit {
     return value.nome;
   };
 
-  displayDisciplina = (value: string | DisciplinaResponse | null): string => {
-    if (value == null) {
-      return '';
-    }
-    if (typeof value === 'string') {
-      return value;
-    }
-    return value.nome;
-  };
-
-  isTurmaSelecionada(turma: TurmaResponse): boolean {
-    return this.turmaSelecionada()?.id === turma.id;
+  isDisciplinaSelecionada(disciplina: DisciplinaResponse): boolean {
+    return this.disciplinaSelecionada()?.id === disciplina.id;
   }
 
-  onTurmaCheck(turma: TurmaResponse, checked: boolean): void {
+  onDisciplinaCheck(disciplina: DisciplinaResponse, checked: boolean): void {
     if (!checked) {
-      this.turmaSelecionada.set(null);
+      this.disciplinaSelecionada.set(null);
       return;
     }
-    this.turmaSelecionada.set(turma);
+    this.disciplinaSelecionada.set(disciplina);
     this.dialogRef.close({
-      turmaId: turma.id,
-      turmaNome: turma.nome,
+      disciplinaId: disciplina.id,
+      disciplinaNome: disciplina.nome,
+      cursoNome: disciplina.cursoNome ?? null,
     });
   }
 
@@ -295,7 +208,7 @@ export class TurmaPickerDialog implements OnInit {
     const cursoId = this.filtros.controls.cursoId.value;
     if (!cursoId) {
       this.cursoSelecionado.set(false);
-      this.turmas.set([]);
+      this.disciplinas.set([]);
       this.totalElements.set(0);
       this.empty.set(false);
       return;
@@ -304,19 +217,17 @@ export class TurmaPickerDialog implements OnInit {
     this.cursoSelecionado.set(true);
     const raw = this.filtros.getRawValue();
     this.loading.set(true);
-    this.turmaService
+    this.disciplinaService
       .listar({
         page: this.pageIndex(),
         size: this.pageSize(),
         sort: 'nome',
         nome: raw.nome.trim() || undefined,
-        disciplinaId: raw.disciplinaId || undefined,
         cursoId,
-        status: 'ABERTA',
       })
       .subscribe({
         next: (page) => {
-          this.turmas.set(page.content ?? []);
+          this.disciplinas.set(page.content ?? []);
           this.totalElements.set(page.totalElements ?? 0);
           this.empty.set((page.content ?? []).length === 0);
           this.loading.set(false);
@@ -335,23 +246,13 @@ export class TurmaPickerDialog implements OnInit {
     this.filtros.controls.cursoId.setValue(null);
     this.selectedCursoNome = null;
     this.cursoSelecionado.set(false);
-    this.turmaSelecionada.set(null);
-    this.turmas.set([]);
+    this.disciplinaSelecionada.set(null);
+    this.disciplinas.set([]);
     this.totalElements.set(0);
     this.empty.set(false);
-    this.filtros.controls.disciplinaBusca.disable({ emitEvent: false });
     this.filtros.controls.nome.disable({ emitEvent: false });
     if (resetBusca) {
       this.filtros.controls.cursoBusca.setValue('', { emitEvent: false });
     }
-    this.limparDisciplinaSelecionada();
-  }
-
-  private limparDisciplinaSelecionada(): void {
-    this.filtros.controls.disciplinaId.setValue(null);
-    this.selectedDisciplinaNome = null;
-    this.filtros.controls.disciplinaBusca.setValue('', { emitEvent: false });
-    this.disciplinasSugestoes.set([]);
-    this.emptyDisciplinas.set(false);
   }
 }

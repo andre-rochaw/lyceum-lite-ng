@@ -1,4 +1,4 @@
-<h2 mat-dialog-title>Buscar turma</h2>
+<h2 mat-dialog-title>Buscar disciplina</h2>
 
 <mat-dialog-content class="picker-content">
   <form class="picker-filters" [formGroup]="filtros" (ngSubmit)="aplicarFiltros()">
@@ -26,35 +26,7 @@
     </mat-form-field>
 
     <mat-form-field appearance="outline" class="picker-field" subscriptSizing="dynamic">
-      <mat-label>Disciplina</mat-label>
-      <input
-        matInput
-        formControlName="disciplinaBusca"
-        [matAutocomplete]="disciplinaAuto"
-        autocomplete="off"
-      />
-      <mat-autocomplete
-        #disciplinaAuto="matAutocomplete"
-        [displayWith]="displayDisciplina"
-        (optionSelected)="onDisciplinaSelected($event)"
-      >
-        @for (disciplina of disciplinasSugestoes(); track disciplina.id) {
-          <mat-option [value]="disciplina">
-            {{ disciplina.nome }}
-            @if (disciplina.cursoNome) {
-              ({{ disciplina.cursoNome }})
-            }
-          </mat-option>
-        }
-        @if (emptyDisciplinas()) {
-          <mat-option [value]="null">Nenhuma disciplina encontrada</mat-option>
-        }
-      </mat-autocomplete>
-      <mat-icon matSuffix>search</mat-icon>
-    </mat-form-field>
-
-    <mat-form-field appearance="outline" class="picker-field" subscriptSizing="dynamic">
-      <mat-label>Nome da turma</mat-label>
+      <mat-label>Nome da disciplina</mat-label>
       <input matInput formControlName="nome" autocomplete="off" />
       <mat-icon matSuffix>search</mat-icon>
     </mat-form-field>
@@ -72,37 +44,32 @@
   </form>
 
   @if (!cursoSelecionado()) {
-    <p class="picker-empty">Selecione um curso para listar as turmas.</p>
+    <p class="picker-empty">Selecione um curso para listar as disciplinas.</p>
   } @else if (loading()) {
     <div class="picker-loading">
       <mat-progress-spinner diameter="36" mode="indeterminate" />
     </div>
   } @else if (empty()) {
-    <p class="picker-empty">Nenhuma turma encontrada.</p>
+    <p class="picker-empty">Nenhuma disciplina encontrada.</p>
   }
 
   @if (cursoSelecionado()) {
     <div class="picker-table-wrap">
-      <table mat-table [dataSource]="turmas()" class="w-full">
+      <table mat-table [dataSource]="disciplinas()" class="w-full">
         <ng-container matColumnDef="selecao">
           <th mat-header-cell *matHeaderCellDef></th>
           <td mat-cell *matCellDef="let row">
             <mat-checkbox
-              [checked]="isTurmaSelecionada(row)"
-              (change)="onTurmaCheck(row, $event.checked)"
-              aria-label="Selecionar turma"
+              [checked]="isDisciplinaSelecionada(row)"
+              (change)="onDisciplinaCheck(row, $event.checked)"
+              aria-label="Selecionar disciplina"
             />
           </td>
         </ng-container>
 
         <ng-container matColumnDef="nome">
-          <th mat-header-cell *matHeaderCellDef>Turma</th>
-          <td mat-cell *matCellDef="let row">{{ row.nome }}</td>
-        </ng-container>
-
-        <ng-container matColumnDef="disciplinaNome">
           <th mat-header-cell *matHeaderCellDef>Disciplina</th>
-          <td mat-cell *matCellDef="let row">{{ row.disciplinaNome }}</td>
+          <td mat-cell *matCellDef="let row">{{ row.nome }}</td>
         </ng-container>
 
         <ng-container matColumnDef="cursoNome">
@@ -110,26 +77,19 @@
           <td mat-cell *matCellDef="let row">{{ row.cursoNome }}</td>
         </ng-container>
 
-        <ng-container matColumnDef="ano">
-          <th mat-header-cell *matHeaderCellDef>Ano</th>
-          <td mat-cell *matCellDef="let row">{{ row.ano }}</td>
+        <ng-container matColumnDef="cargaHoraria">
+          <th mat-header-cell *matHeaderCellDef>Carga horaria</th>
+          <td mat-cell *matCellDef="let row">{{ row.cargaHoraria }}</td>
         </ng-container>
 
-        <ng-container matColumnDef="semestre">
+        <ng-container matColumnDef="creditos">
+          <th mat-header-cell *matHeaderCellDef>Creditos</th>
+          <td mat-cell *matCellDef="let row">{{ row.creditos }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="semestreRecomendado">
           <th mat-header-cell *matHeaderCellDef>Semestre</th>
-          <td mat-cell *matCellDef="let row">{{ row.semestre }}</td>
-        </ng-container>
-
-        <ng-container matColumnDef="status">
-          <th mat-header-cell *matHeaderCellDef>Status</th>
-          <td mat-cell *matCellDef="let row">{{ row.status }}</td>
-        </ng-container>
-
-        <ng-container matColumnDef="vagas">
-          <th mat-header-cell *matHeaderCellDef>Vagas</th>
-          <td mat-cell *matCellDef="let row">
-            {{ row.vagasOcupadas }}/{{ row.limiteVagas }}
-          </td>
+          <td mat-cell *matCellDef="let row">{{ row.semestreRecomendado }}</td>
         </ng-container>
 
         <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
