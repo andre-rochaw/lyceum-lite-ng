@@ -44,68 +44,101 @@
 </div>
 
 @if (empty()) {
-  <p class="text-sm opacity-70 mb-4">Nenhuma disciplina cadastrada.</p>
+  <div class="empty-state">
+    @if (temFiltrosAtivos()) {
+      <p>Nenhuma disciplina encontrada para os filtros informados.</p>
+      <button mat-stroked-button type="button" (click)="limparFiltros()">
+        Limpar filtros
+      </button>
+    } @else {
+      <p>Ainda nao existem disciplinas.</p>
+      <a mat-flat-button color="primary" routerLink="/disciplinas/novo">
+        <mat-icon>add</mat-icon>
+        Criar disciplina
+      </a>
+    }
+  </div>
+} @else {
+  <div class="table-wrap">
+    <table
+      mat-table
+      [dataSource]="disciplinas()"
+      class="w-full"
+      matSort
+      [matSortActive]="sortActive()"
+      [matSortDirection]="sortDirection()"
+      (matSortChange)="onSort($event)"
+    >
+      <ng-container matColumnDef="nome">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header="nome">Nome</th>
+        <td mat-cell *matCellDef="let row">{{ row.nome }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="cursoNome">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header="curso.nome">
+          Curso
+        </th>
+        <td mat-cell *matCellDef="let row">{{ row.cursoNome }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="cargaHoraria">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header="cargaHoraria">
+          Carga
+        </th>
+        <td mat-cell *matCellDef="let row">{{ row.cargaHoraria }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="creditos">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header="creditos">
+          Creditos
+        </th>
+        <td mat-cell *matCellDef="let row">{{ row.creditos }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="semestreRecomendado">
+        <th
+          mat-header-cell
+          *matHeaderCellDef
+          mat-sort-header="semestreRecomendado"
+        >
+          Semestre
+        </th>
+        <td mat-cell *matCellDef="let row">{{ row.semestreRecomendado }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="acoes">
+        <th mat-header-cell *matHeaderCellDef></th>
+        <td mat-cell *matCellDef="let row">
+          <a
+            mat-icon-button
+            [routerLink]="['/disciplinas', row.id, 'editar']"
+            aria-label="Editar disciplina"
+          >
+            <mat-icon>edit</mat-icon>
+          </a>
+          <button
+            mat-icon-button
+            type="button"
+            color="warn"
+            aria-label="Excluir disciplina"
+            (click)="confirmarExclusao(row)"
+          >
+            <mat-icon>delete</mat-icon>
+          </button>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+    </table>
+
+    <mat-paginator
+      [length]="totalElements()"
+      [pageIndex]="pageIndex()"
+      [pageSize]="pageSize()"
+      [pageSizeOptions]="[5, 10, 20]"
+      (page)="onPage($event)"
+      showFirstLastButtons
+    />
+  </div>
 }
-
-<div class="table-wrap">
-  <table mat-table [dataSource]="disciplinas()" class="w-full">
-    <ng-container matColumnDef="nome">
-      <th mat-header-cell *matHeaderCellDef>Nome</th>
-      <td mat-cell *matCellDef="let row">{{ row.nome }}</td>
-    </ng-container>
-
-    <ng-container matColumnDef="cursoNome">
-      <th mat-header-cell *matHeaderCellDef>Curso</th>
-      <td mat-cell *matCellDef="let row">{{ row.cursoNome }}</td>
-    </ng-container>
-
-    <ng-container matColumnDef="cargaHoraria">
-      <th mat-header-cell *matHeaderCellDef>Carga</th>
-      <td mat-cell *matCellDef="let row">{{ row.cargaHoraria }}</td>
-    </ng-container>
-
-    <ng-container matColumnDef="creditos">
-      <th mat-header-cell *matHeaderCellDef>Creditos</th>
-      <td mat-cell *matCellDef="let row">{{ row.creditos }}</td>
-    </ng-container>
-
-    <ng-container matColumnDef="semestreRecomendado">
-      <th mat-header-cell *matHeaderCellDef>Semestre</th>
-      <td mat-cell *matCellDef="let row">{{ row.semestreRecomendado }}</td>
-    </ng-container>
-
-    <ng-container matColumnDef="acoes">
-      <th mat-header-cell *matHeaderCellDef></th>
-      <td mat-cell *matCellDef="let row">
-        <a
-          mat-icon-button
-          [routerLink]="['/disciplinas', row.id, 'editar']"
-          aria-label="Editar disciplina"
-        >
-          <mat-icon>edit</mat-icon>
-        </a>
-        <button
-          mat-icon-button
-          type="button"
-          color="warn"
-          aria-label="Excluir disciplina"
-          (click)="confirmarExclusao(row)"
-        >
-          <mat-icon>delete</mat-icon>
-        </button>
-      </td>
-    </ng-container>
-
-    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-    <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
-  </table>
-
-  <mat-paginator
-    [length]="totalElements()"
-    [pageIndex]="pageIndex()"
-    [pageSize]="pageSize()"
-    [pageSizeOptions]="[5, 10, 20]"
-    (page)="onPage($event)"
-    showFirstLastButtons
-  />
-</div>

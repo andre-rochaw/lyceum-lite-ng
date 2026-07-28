@@ -30,11 +30,19 @@ import { CursoResponse } from '../../../cursos/models/curso.models';
 import { DisciplinaService } from '../../../disciplinas/data/disciplina.service';
 import { DisciplinaResponse } from '../../../disciplinas/models/disciplina.models';
 import { TurmaService } from '../../../turmas/data/turma.service';
-import { TurmaResponse } from '../../../turmas/models/turma.models';
+import {
+  StatusTurma,
+  TurmaResponse,
+} from '../../../turmas/models/turma.models';
 
 export interface TurmaPickerResult {
   turmaId: string;
   turmaNome: string;
+  disciplinaNome: string;
+  cursoNome: string;
+  status: StatusTurma;
+  limiteVagas: number;
+  vagasOcupadas: number;
 }
 
 @Component({
@@ -288,6 +296,11 @@ export class TurmaPickerDialog implements OnInit {
     this.dialogRef.close({
       turmaId: turma.id,
       turmaNome: turma.nome,
+      disciplinaNome: turma.disciplinaNome,
+      cursoNome: turma.cursoNome,
+      status: turma.status,
+      limiteVagas: turma.limiteVagas,
+      vagasOcupadas: turma.vagasOcupadas,
     });
   }
 

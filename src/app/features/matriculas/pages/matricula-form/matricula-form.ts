@@ -1,4 +1,4 @@
-import { Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
+import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
   FormBuilder,
@@ -11,10 +11,12 @@ import {
 } from '@angular/material/autocomplete';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
+import { MatChipsModule } from '@angular/material/chips';
 import { MatDialog } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { Router, RouterLink } from '@angular/router';
 import {
   debounceTime,
@@ -30,7 +32,12 @@ import {
 } from '../../components/turma-picker-dialog/turma-picker-dialog';
 import { MatriculaService } from '../../data/matricula.service';
 import { CreateMatriculaRequest } from '../../models/matricula.models';
+import { StatusTurma } from '../../../turmas/models/turma.models';
 import { NotificationService } from '../../../../core/services/notification.service';
+import {
+  ocupacaoPercent,
+  vagasDisponiveis,
+} from '../../../../shared/utils/vagas';
 
 @Component({
   selector: 'app-matricula-form',
@@ -43,6 +50,8 @@ import { NotificationService } from '../../../../core/services/notification.serv
     MatButtonModule,
     MatAutocompleteModule,
     MatIconModule,
+    MatChipsModule,
+    MatProgressBarModule,
   ],
   templateUrl: './matricula-form.html',
   styleUrl: './matricula-form.css',
@@ -59,6 +68,23 @@ export class MatriculaForm implements OnInit {
   readonly submitting = signal(false);
   readonly alunosSugestoes = signal<AlunoResponse[]>([]);
   readonly emptyAlunos = signal(false);
+  readonly turmaSelecionada = signal<TurmaPickerResult | null>(null);
+
+  readonly vagasDisponiveisTurma = computed(() => {
+    const turma = this.turmaSelecionada();
+    if (!turma) {
+      return 0;
+    }
+    return vagasDisponiveis(turma.vagasOcupadas, turma.limiteVagas);
+  });
+
+  readonly ocupacaoPct = computed(() => {
+    const turma = this.turmaSelecionada();
+    if (!turma) {
+      return 0;
+    }
+    return ocupacaoPercent(turma.vagasOcupadas, turma.limiteVagas);
+  });
 
   private selectedAlunoNome: string | null = null;
 
@@ -130,6 +156,45 @@ export class MatriculaForm implements OnInit {
     return value.nome;
   };
 
+  statusTurmaLabel(status: StatusTurma): string {
+    switch (status) {
+      case 'ABERTA':
+        return 'Aberta';
+      case 'CONCLUIDA':
+        return 'Concluida';
+      case 'EM_AVALIACAO':
+        return 'Em avaliacao';
+      default:
+        return status;
+    }
+  }
+
+  statusTurmaChipClass(status: StatusTurma): string {
+    switch (status) {
+      case 'ABERTA':
+        return 'status-chip status-chip--aberta';
+      case 'CONCLUIDA':
+        return 'status-chip status-chip--concluida';
+      case 'EM_AVALIACAO':
+        return 'status-chip status-chip--em-avaliacao';
+      default:
+        return 'status-chip';
+    }
+  }
+
+  statusTurmaDotClass(status: StatusTurma): string {
+    switch (status) {
+      case 'ABERTA':
+        return 'status-dot status-dot--aberta';
+      case 'CONCLUIDA':
+        return 'status-dot status-dot--concluida';
+      case 'EM_AVALIACAO':
+        return 'status-dot status-dot--em-avaliacao';
+      default:
+        return 'status-dot';
+    }
+  }
+
   abrirBuscaTurma(): void {
     const ref = this.dialog.open(TurmaPickerDialog, {
       width: '960px',
@@ -141,6 +206,7 @@ export class MatriculaForm implements OnInit {
       if (!result?.turmaId) {
         return;
       }
+      this.turmaSelecionada.set(result);
       this.form.controls.turmaId.setValue(result.turmaId);
       this.form.controls.turmaNome.setValue(result.turmaNome);
       this.form.controls.turmaNome.updateValueAndValidity();
@@ -149,6 +215,7 @@ export class MatriculaForm implements OnInit {
   }
 
   limparTurma(): void {
+    this.turmaSelecionada.set(null);
     this.form.controls.turmaId.setValue(null);
     this.form.controls.turmaNome.setValue('');
   }

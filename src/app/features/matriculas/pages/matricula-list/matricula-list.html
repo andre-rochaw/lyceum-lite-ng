@@ -61,7 +61,7 @@
     <mat-select formControlName="status">
       <mat-option [value]="null">Todos</mat-option>
       @for (st of statusOptions; track st) {
-        <mat-option [value]="st">{{ st }}</mat-option>
+        <mat-option [value]="st">{{ statusLabel(st) }}</mat-option>
       }
     </mat-select>
   </mat-form-field>
@@ -73,76 +73,110 @@
 </form>
 
 @if (empty()) {
-  <p class="text-sm opacity-70 mb-4">Nenhuma matricula encontrada.</p>
+  <div class="empty-state">
+    @if (temFiltrosAtivos()) {
+      <p>Nenhuma matricula encontrada para os filtros informados.</p>
+      <button mat-stroked-button type="button" (click)="limparFiltros()">
+        Limpar filtros
+      </button>
+    } @else {
+      <p>Ainda nao existem matriculas.</p>
+      <a mat-flat-button color="primary" routerLink="/matriculas/novo">
+        <mat-icon>add</mat-icon>
+        Criar matricula
+      </a>
+    }
+  </div>
+} @else {
+  <div class="table-wrap">
+    <table
+      mat-table
+      [dataSource]="matriculas()"
+      class="w-full"
+      matSort
+      [matSortActive]="sortActive()"
+      [matSortDirection]="sortDirection()"
+      (matSortChange)="onSort($event)"
+    >
+      <ng-container matColumnDef="alunoNome">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header="aluno.nome">Aluno</th>
+        <td mat-cell *matCellDef="let row">{{ row.alunoNome }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="turmaNome">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header="turma.nome">Turma</th>
+        <td mat-cell *matCellDef="let row">{{ row.turmaNome }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="disciplinaNome">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header="turma.disciplina.nome">
+          Disciplina
+        </th>
+        <td mat-cell *matCellDef="let row">{{ row.disciplinaNome }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="cursoNome">
+        <th
+          mat-header-cell
+          *matHeaderCellDef
+          mat-sort-header="turma.disciplina.curso.nome"
+        >
+          Curso
+        </th>
+        <td mat-cell *matCellDef="let row">{{ row.cursoNome }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="status">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header="status">Status</th>
+        <td mat-cell *matCellDef="let row">
+          <mat-chip [class]="statusChipClass(row.status)">
+            <span [class]="statusDotClass(row.status)" aria-hidden="true"></span>
+            {{ statusLabel(row.status) }}
+          </mat-chip>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="acoes">
+        <th mat-header-cell *matHeaderCellDef></th>
+        <td mat-cell *matCellDef="let row">
+          <div class="row-actions">
+            @if (podeConfirmar(row)) {
+              <button
+                mat-stroked-button
+                type="button"
+                color="primary"
+                [disabled]="actionInProgress()"
+                (click)="confirmar(row)"
+              >
+                Confirmar
+              </button>
+            }
+            @if (podeCancelar(row)) {
+              <button
+                mat-button
+                type="button"
+                color="warn"
+                [disabled]="actionInProgress()"
+                (click)="cancelar(row)"
+              >
+                Cancelar
+              </button>
+            }
+          </div>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+    </table>
+
+    <mat-paginator
+      [length]="totalElements()"
+      [pageIndex]="pageIndex()"
+      [pageSize]="pageSize()"
+      [pageSizeOptions]="[5, 10, 20]"
+      (page)="onPage($event)"
+      showFirstLastButtons
+    />
+  </div>
 }
-
-<div class="table-wrap">
-  <table mat-table [dataSource]="matriculas()" class="w-full">
-    <ng-container matColumnDef="alunoNome">
-      <th mat-header-cell *matHeaderCellDef>Aluno</th>
-      <td mat-cell *matCellDef="let row">{{ row.alunoNome }}</td>
-    </ng-container>
-
-    <ng-container matColumnDef="turmaNome">
-      <th mat-header-cell *matHeaderCellDef>Turma</th>
-      <td mat-cell *matCellDef="let row">{{ row.turmaNome }}</td>
-    </ng-container>
-
-    <ng-container matColumnDef="disciplinaNome">
-      <th mat-header-cell *matHeaderCellDef>Disciplina</th>
-      <td mat-cell *matCellDef="let row">{{ row.disciplinaNome }}</td>
-    </ng-container>
-
-    <ng-container matColumnDef="cursoNome">
-      <th mat-header-cell *matHeaderCellDef>Curso</th>
-      <td mat-cell *matCellDef="let row">{{ row.cursoNome }}</td>
-    </ng-container>
-
-    <ng-container matColumnDef="status">
-      <th mat-header-cell *matHeaderCellDef>Status</th>
-      <td mat-cell *matCellDef="let row">{{ row.status }}</td>
-    </ng-container>
-
-    <ng-container matColumnDef="acoes">
-      <th mat-header-cell *matHeaderCellDef></th>
-      <td mat-cell *matCellDef="let row">
-        <div class="row-actions">
-          @if (podeConfirmar(row)) {
-            <button
-              mat-stroked-button
-              type="button"
-              color="primary"
-              [disabled]="actionInProgress()"
-              (click)="confirmar(row)"
-            >
-              Confirmar
-            </button>
-          }
-          @if (podeCancelar(row)) {
-            <button
-              mat-button
-              type="button"
-              color="warn"
-              [disabled]="actionInProgress()"
-              (click)="cancelar(row)"
-            >
-              Cancelar
-            </button>
-          }
-        </div>
-      </td>
-    </ng-container>
-
-    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-    <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
-  </table>
-
-  <mat-paginator
-    [length]="totalElements()"
-    [pageIndex]="pageIndex()"
-    [pageSize]="pageSize()"
-    [pageSizeOptions]="[5, 10, 20]"
-    (page)="onPage($event)"
-    showFirstLastButtons
-  />
-</div>

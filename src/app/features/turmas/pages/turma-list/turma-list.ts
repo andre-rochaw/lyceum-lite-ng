@@ -3,12 +3,15 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { MatAutocompleteModule, MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
 import { MatButtonModule } from '@angular/material/button';
+import { MatChipsModule } from '@angular/material/chips';
 import { MatDialog } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatSelectModule } from '@angular/material/select';
+import { MatSortModule, Sort } from '@angular/material/sort';
 import { MatTableModule } from '@angular/material/table';
 import { RouterLink } from '@angular/router';
 import {
@@ -29,6 +32,11 @@ import {
   TurmaResponse,
 } from '../../models/turma.models';
 import { NotificationService } from '../../../../core/services/notification.service';
+import { toSpringSort } from '../../../../shared/utils/spring-sort';
+import {
+  ocupacaoPercent,
+  vagasDisponiveis,
+} from '../../../../shared/utils/vagas';
 
 @Component({
   selector: 'app-turma-list',
@@ -37,12 +45,15 @@ import { NotificationService } from '../../../../core/services/notification.serv
     ReactiveFormsModule,
     MatTableModule,
     MatPaginatorModule,
+    MatSortModule,
     MatButtonModule,
     MatIconModule,
     MatFormFieldModule,
     MatInputModule,
     MatSelectModule,
     MatAutocompleteModule,
+    MatChipsModule,
+    MatProgressBarModule,
   ],
   templateUrl: './turma-list.html',
   styleUrl: './turma-list.css',
@@ -64,8 +75,7 @@ export class TurmaList implements OnInit {
     'ano',
     'semestre',
     'status',
-    'limiteVagas',
-    'vagasOcupadas',
+    'vagas',
     'acoes',
   ];
   readonly turmas = signal<TurmaResponse[]>([]);
@@ -73,6 +83,8 @@ export class TurmaList implements OnInit {
   readonly pageIndex = signal(0);
   readonly pageSize = signal(10);
   readonly empty = signal(false);
+  readonly sortActive = signal('nome');
+  readonly sortDirection = signal<'asc' | 'desc'>('asc');
 
   readonly disciplinasSugestoes = signal<DisciplinaResponse[]>([]);
   readonly emptyDisciplinas = signal(false);
@@ -180,6 +192,13 @@ export class TurmaList implements OnInit {
     this.carregar();
   }
 
+  onSort(sort: Sort): void {
+    this.sortActive.set(sort.active || 'nome');
+    this.sortDirection.set(sort.direction === 'desc' ? 'desc' : 'asc');
+    this.pageIndex.set(0);
+    this.carregar();
+  }
+
   aplicarFiltros(): void {
     this.pageIndex.set(0);
     this.carregar();
@@ -204,6 +223,18 @@ export class TurmaList implements OnInit {
     });
     this.pageIndex.set(0);
     this.carregar();
+  }
+
+  temFiltrosAtivos(): boolean {
+    const raw = this.filtros.getRawValue();
+    return !!(
+      raw.nome.trim() ||
+      raw.disciplinaId ||
+      raw.cursoId ||
+      raw.ano != null ||
+      raw.semestre != null ||
+      raw.status
+    );
   }
 
   onDisciplinaSelected(event: MatAutocompleteSelectedEvent): void {
@@ -248,6 +279,53 @@ export class TurmaList implements OnInit {
     return value.nome;
   };
 
+  statusLabel(status: StatusTurma): string {
+    switch (status) {
+      case 'ABERTA':
+        return 'Aberta';
+      case 'CONCLUIDA':
+        return 'Concluida';
+      case 'EM_AVALIACAO':
+        return 'Em avaliacao';
+      default:
+        return status;
+    }
+  }
+
+  statusChipClass(status: StatusTurma): string {
+    switch (status) {
+      case 'ABERTA':
+        return 'status-chip status-chip--aberta';
+      case 'CONCLUIDA':
+        return 'status-chip status-chip--concluida';
+      case 'EM_AVALIACAO':
+        return 'status-chip status-chip--em-avaliacao';
+      default:
+        return 'status-chip';
+    }
+  }
+
+  statusDotClass(status: StatusTurma): string {
+    switch (status) {
+      case 'ABERTA':
+        return 'status-dot status-dot--aberta';
+      case 'CONCLUIDA':
+        return 'status-dot status-dot--concluida';
+      case 'EM_AVALIACAO':
+        return 'status-dot status-dot--em-avaliacao';
+      default:
+        return 'status-dot';
+    }
+  }
+
+  vagasDisp(row: TurmaResponse): number {
+    return vagasDisponiveis(row.vagasOcupadas, row.limiteVagas);
+  }
+
+  ocupacaoPct(row: TurmaResponse): number {
+    return ocupacaoPercent(row.vagasOcupadas, row.limiteVagas);
+  }
+
   carregar(): void {
     const raw = this.filtros.getRawValue();
     const ano =
@@ -258,12 +336,19 @@ export class TurmaList implements OnInit {
       raw.semestre != null && String(raw.semestre).trim() !== ''
         ? Number(raw.semestre)
         : undefined;
+    const sort = toSpringSort(
+      {
+        active: this.sortActive(),
+        direction: this.sortDirection(),
+      },
+      'nome,asc',
+    );
 
     this.turmaService
       .listar({
         page: this.pageIndex(),
         size: this.pageSize(),
-        sort: 'nome',
+        sort,
         nome: raw.nome.trim() || undefined,
         disciplinaId: raw.disciplinaId || undefined,
         cursoId: raw.cursoId || undefined,

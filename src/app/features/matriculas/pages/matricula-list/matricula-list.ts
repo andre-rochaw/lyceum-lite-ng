@@ -6,11 +6,14 @@ import {
   MatAutocompleteSelectedEvent,
 } from '@angular/material/autocomplete';
 import { MatButtonModule } from '@angular/material/button';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatDialog } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatSelectModule } from '@angular/material/select';
+import { MatSortModule, Sort } from '@angular/material/sort';
 import { MatTableModule } from '@angular/material/table';
 import { RouterLink } from '@angular/router';
 import {
@@ -23,6 +26,8 @@ import { AlunoService } from '../../../alunos/data/aluno.service';
 import { AlunoResponse } from '../../../alunos/models/aluno.models';
 import { TurmaService } from '../../../turmas/data/turma.service';
 import { TurmaResponse } from '../../../turmas/models/turma.models';
+import { ConfirmCancelarMatriculaDialog } from '../../components/confirm-cancelar-matricula-dialog';
+import { ConfirmConfirmarMatriculaDialog } from '../../components/confirm-confirmar-matricula-dialog';
 import { MatriculaService } from '../../data/matricula.service';
 import {
   STATUS_MATRICULA_OPTIONS,
@@ -30,6 +35,7 @@ import {
   MatriculaResponse,
 } from '../../models/matricula.models';
 import { NotificationService } from '../../../../core/services/notification.service';
+import { toSpringSort } from '../../../../shared/utils/spring-sort';
 
 @Component({
   selector: 'app-matricula-list',
@@ -38,12 +44,14 @@ import { NotificationService } from '../../../../core/services/notification.serv
     ReactiveFormsModule,
     MatTableModule,
     MatPaginatorModule,
+    MatSortModule,
     MatButtonModule,
     MatIconModule,
     MatFormFieldModule,
     MatInputModule,
     MatSelectModule,
     MatAutocompleteModule,
+    MatChipsModule,
   ],
   templateUrl: './matricula-list.html',
   styleUrl: './matricula-list.css',
@@ -52,6 +60,7 @@ export class MatriculaList implements OnInit {
   private readonly matriculaService = inject(MatriculaService);
   private readonly alunoService = inject(AlunoService);
   private readonly turmaService = inject(TurmaService);
+  private readonly dialog = inject(MatDialog);
   private readonly notifications = inject(NotificationService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly fb = inject(FormBuilder);
@@ -71,6 +80,8 @@ export class MatriculaList implements OnInit {
   readonly pageSize = signal(10);
   readonly empty = signal(false);
   readonly actionInProgress = signal(false);
+  readonly sortActive = signal('createdAt');
+  readonly sortDirection = signal<'asc' | 'desc'>('desc');
 
   readonly alunosSugestoes = signal<AlunoResponse[]>([]);
   readonly emptyAlunos = signal(false);
@@ -172,6 +183,13 @@ export class MatriculaList implements OnInit {
     this.carregar();
   }
 
+  onSort(sort: Sort): void {
+    this.sortActive.set(sort.active || 'createdAt');
+    this.sortDirection.set(sort.direction === 'asc' ? 'asc' : 'desc');
+    this.pageIndex.set(0);
+    this.carregar();
+  }
+
   aplicarFiltros(): void {
     this.pageIndex.set(0);
     this.carregar();
@@ -193,6 +211,11 @@ export class MatriculaList implements OnInit {
     });
     this.pageIndex.set(0);
     this.carregar();
+  }
+
+  temFiltrosAtivos(): boolean {
+    const raw = this.filtros.getRawValue();
+    return !!(raw.alunoId || raw.turmaId || raw.status);
   }
 
   onAlunoSelected(event: MatAutocompleteSelectedEvent): void {
@@ -235,6 +258,45 @@ export class MatriculaList implements OnInit {
     return value.nome;
   };
 
+  statusLabel(status: StatusMatricula): string {
+    switch (status) {
+      case 'PENDENTE':
+        return 'Pendente';
+      case 'CONFIRMADA':
+        return 'Confirmada';
+      case 'CANCELADA':
+        return 'Cancelada';
+      default:
+        return status;
+    }
+  }
+
+  statusChipClass(status: StatusMatricula): string {
+    switch (status) {
+      case 'PENDENTE':
+        return 'status-chip status-chip--pendente';
+      case 'CONFIRMADA':
+        return 'status-chip status-chip--confirmada';
+      case 'CANCELADA':
+        return 'status-chip status-chip--cancelada';
+      default:
+        return 'status-chip';
+    }
+  }
+
+  statusDotClass(status: StatusMatricula): string {
+    switch (status) {
+      case 'PENDENTE':
+        return 'status-dot status-dot--pendente';
+      case 'CONFIRMADA':
+        return 'status-dot status-dot--confirmada';
+      case 'CANCELADA':
+        return 'status-dot status-dot--cancelada';
+      default:
+        return 'status-dot';
+    }
+  }
+
   podeConfirmar(row: MatriculaResponse): boolean {
     return row.status === 'PENDENTE';
   }
@@ -245,10 +307,18 @@ export class MatriculaList implements OnInit {
 
   carregar(): void {
     const raw = this.filtros.getRawValue();
+    const sort = toSpringSort(
+      {
+        active: this.sortActive(),
+        direction: this.sortDirection(),
+      },
+      'createdAt,desc',
+    );
     this.matriculaService
       .listar({
         page: this.pageIndex(),
         size: this.pageSize(),
+        sort,
         alunoId: raw.alunoId || undefined,
         turmaId: raw.turmaId || undefined,
         status: raw.status || undefined,
@@ -266,16 +336,25 @@ export class MatriculaList implements OnInit {
     if (!this.podeConfirmar(row) || this.actionInProgress()) {
       return;
     }
-    this.actionInProgress.set(true);
-    this.matriculaService.confirmar(row.id).subscribe({
-      next: () => {
-        this.notifications.success('Matricula confirmada com sucesso');
-        this.actionInProgress.set(false);
-        this.carregar();
-      },
-      error: () => {
-        this.actionInProgress.set(false);
-      },
+    const ref = this.dialog.open(ConfirmConfirmarMatriculaDialog, {
+      width: '420px',
+      data: { alunoNome: row.alunoNome, turmaNome: row.turmaNome },
+    });
+    ref.afterClosed().subscribe((confirmed: boolean | undefined) => {
+      if (!confirmed) {
+        return;
+      }
+      this.actionInProgress.set(true);
+      this.matriculaService.confirmar(row.id).subscribe({
+        next: () => {
+          this.notifications.success('Matricula confirmada com sucesso');
+          this.actionInProgress.set(false);
+          this.carregar();
+        },
+        error: () => {
+          this.actionInProgress.set(false);
+        },
+      });
     });
   }
 
@@ -283,16 +362,25 @@ export class MatriculaList implements OnInit {
     if (!this.podeCancelar(row) || this.actionInProgress()) {
       return;
     }
-    this.actionInProgress.set(true);
-    this.matriculaService.cancelar(row.id).subscribe({
-      next: () => {
-        this.notifications.success('Matricula cancelada com sucesso');
-        this.actionInProgress.set(false);
-        this.carregar();
-      },
-      error: () => {
-        this.actionInProgress.set(false);
-      },
+    const ref = this.dialog.open(ConfirmCancelarMatriculaDialog, {
+      width: '420px',
+      data: { alunoNome: row.alunoNome, turmaNome: row.turmaNome },
+    });
+    ref.afterClosed().subscribe((confirmed: boolean | undefined) => {
+      if (!confirmed) {
+        return;
+      }
+      this.actionInProgress.set(true);
+      this.matriculaService.cancelar(row.id).subscribe({
+        next: () => {
+          this.notifications.success('Matricula cancelada com sucesso');
+          this.actionInProgress.set(false);
+          this.carregar();
+        },
+        error: () => {
+          this.actionInProgress.set(false);
+        },
+      });
     });
   }
 }

@@ -48,3 +48,9 @@
   border-radius: 8px;
   background: var(--mat-sys-surface-container-lowest, transparent);
 }
+
+.picker-vagas-hint {
+  display: block;
+  font-size: 0.75rem;
+  opacity: 0.7;
+}

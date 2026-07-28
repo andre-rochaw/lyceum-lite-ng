@@ -1,3 +1,111 @@
 /* You can add global styles to this file, and also import other style files */
 
 @import 'tailwindcss';
+
+/* Status chips (matricula / turma) */
+.status-chip {
+  font-weight: 500;
+}
+
+.status-chip--pendente,
+.status-chip--em-avaliacao {
+  --mdc-chip-elevated-container-color: color-mix(in srgb, #f9a825 22%, transparent);
+  --mdc-chip-label-text-color: #7a5a00;
+}
+
+.status-chip--confirmada,
+.status-chip--aberta {
+  --mdc-chip-elevated-container-color: color-mix(in srgb, #2e7d32 22%, transparent);
+  --mdc-chip-label-text-color: #1b5e20;
+}
+
+.status-chip--cancelada,
+.status-chip--concluida {
+  --mdc-chip-elevated-container-color: color-mix(in srgb, #c62828 18%, transparent);
+  --mdc-chip-label-text-color: #8b1a1a;
+}
+
+.status-dot {
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 0.35rem;
+  vertical-align: middle;
+}
+
+.status-dot--pendente,
+.status-dot--em-avaliacao {
+  background: #f9a825;
+}
+
+.status-dot--confirmada,
+.status-dot--aberta {
+  background: #2e7d32;
+}
+
+.status-dot--cancelada,
+.status-dot--concluida {
+  background: #c62828;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 1.25rem 0.25rem 1.5rem;
+}
+
+.empty-state p {
+  margin: 0;
+  opacity: 0.75;
+}
+
+.vagas-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 7rem;
+}
+
+.vagas-cell__ratio {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.vagas-cell__hint {
+  font-size: 0.75rem;
+  opacity: 0.7;
+}
+
+.turma-resumo {
+  border: 1px solid color-mix(in srgb, var(--mat-sys-outline, #79747e) 35%, transparent);
+  border-radius: 8px;
+  padding: 0.875rem 1rem;
+  margin: 0.25rem 0 0.5rem;
+  background: var(--mat-sys-surface-container-lowest, transparent);
+}
+
+.turma-resumo h3 {
+  margin: 0 0 0.75rem;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.turma-resumo dl {
+  margin: 0;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.35rem 0.75rem;
+  font-size: 0.875rem;
+}
+
+.turma-resumo dt {
+  opacity: 0.7;
+}
+
+.turma-resumo dd {
+  margin: 0;
+  font-weight: 500;
+}

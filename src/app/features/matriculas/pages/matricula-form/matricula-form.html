@@ -84,6 +84,43 @@
           </button>
         </div>
 
+        @if (turmaSelecionada(); as turma) {
+          <section class="turma-resumo" aria-label="Resumo da turma">
+            <h3>{{ turma.turmaNome }}</h3>
+            <dl>
+              <dt>Disciplina</dt>
+              <dd>{{ turma.disciplinaNome }}</dd>
+              <dt>Curso</dt>
+              <dd>{{ turma.cursoNome }}</dd>
+              <dt>Status</dt>
+              <dd>
+                <mat-chip [class]="statusTurmaChipClass(turma.status)">
+                  <span
+                    [class]="statusTurmaDotClass(turma.status)"
+                    aria-hidden="true"
+                  ></span>
+                  {{ statusTurmaLabel(turma.status) }}
+                </mat-chip>
+              </dd>
+              <dt>Vagas</dt>
+              <dd>
+                <div class="vagas-cell">
+                  <span class="vagas-cell__ratio">
+                    {{ turma.vagasOcupadas }} / {{ turma.limiteVagas }}
+                  </span>
+                  <mat-progress-bar
+                    mode="determinate"
+                    [value]="ocupacaoPct()"
+                  />
+                  <span class="vagas-cell__hint">
+                    Disponiveis: {{ vagasDisponiveisTurma() }}
+                  </span>
+                </div>
+              </dd>
+            </dl>
+          </section>
+        }
+
         <div class="matricula-form__actions">
           <a mat-button routerLink="/matriculas">Cancelar</a>
           <button

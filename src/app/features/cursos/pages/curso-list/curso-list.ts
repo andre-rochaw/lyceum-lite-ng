@@ -7,6 +7,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
+import { MatSortModule, Sort } from '@angular/material/sort';
 import { MatTableModule } from '@angular/material/table';
 import { RouterLink } from '@angular/router';
 import { debounceTime, distinctUntilChanged } from 'rxjs';
@@ -14,6 +15,7 @@ import { ConfirmExcluirCursoDialog } from '../../components/confirm-excluir-curs
 import { CursoService } from '../../data/curso.service';
 import { CursoResponse } from '../../models/curso.models';
 import { NotificationService } from '../../../../core/services/notification.service';
+import { toSpringSort } from '../../../../shared/utils/spring-sort';
 
 @Component({
   selector: 'app-curso-list',
@@ -22,6 +24,7 @@ import { NotificationService } from '../../../../core/services/notification.serv
     ReactiveFormsModule,
     MatTableModule,
     MatPaginatorModule,
+    MatSortModule,
     MatButtonModule,
     MatIconModule,
     MatFormFieldModule,
@@ -43,6 +46,8 @@ export class CursoList implements OnInit {
   readonly pageSize = signal(10);
   readonly empty = signal(false);
   readonly nomeFiltro = signal('');
+  readonly sortActive = signal('nome');
+  readonly sortDirection = signal<'asc' | 'desc'>('asc');
   readonly buscaControl = new FormControl('', { nonNullable: true });
 
   ngOnInit(): void {
@@ -63,12 +68,29 @@ export class CursoList implements OnInit {
     this.carregar();
   }
 
+  onSort(sort: Sort): void {
+    this.sortActive.set(sort.active || 'nome');
+    this.sortDirection.set(sort.direction === 'desc' ? 'desc' : 'asc');
+    this.pageIndex.set(0);
+    this.carregar();
+  }
+
+  limparBusca(): void {
+    this.buscaControl.setValue('');
+  }
+
   carregar(): void {
     this.cursoService
       .listar({
         page: this.pageIndex(),
         size: this.pageSize(),
-        sort: 'nome',
+        sort: toSpringSort(
+          {
+            active: this.sortActive(),
+            direction: this.sortDirection(),
+          },
+          'nome,asc',
+        ),
         nome: this.nomeFiltro() || undefined,
       })
       .subscribe({

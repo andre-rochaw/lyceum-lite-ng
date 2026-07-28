@@ -8,6 +8,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
+import { MatSortModule, Sort } from '@angular/material/sort';
 import { MatTableModule } from '@angular/material/table';
 import { RouterLink } from '@angular/router';
 import {
@@ -22,6 +23,7 @@ import { ConfirmExcluirDisciplinaDialog } from '../../components/confirm-excluir
 import { DisciplinaService } from '../../data/disciplina.service';
 import { DisciplinaResponse } from '../../models/disciplina.models';
 import { NotificationService } from '../../../../core/services/notification.service';
+import { toSpringSort } from '../../../../shared/utils/spring-sort';
 
 @Component({
   selector: 'app-disciplina-list',
@@ -30,6 +32,7 @@ import { NotificationService } from '../../../../core/services/notification.serv
     ReactiveFormsModule,
     MatTableModule,
     MatPaginatorModule,
+    MatSortModule,
     MatButtonModule,
     MatIconModule,
     MatFormFieldModule,
@@ -63,6 +66,8 @@ export class DisciplinaList implements OnInit {
   readonly cursoIdFiltro = signal<string | null>(null);
   readonly cursosSugestoes = signal<CursoResponse[]>([]);
   readonly emptyCursos = signal(false);
+  readonly sortActive = signal('nome');
+  readonly sortDirection = signal<'asc' | 'desc'>('asc');
 
   readonly buscaControl = new FormControl('', { nonNullable: true });
   readonly cursoBuscaControl = new FormControl('', { nonNullable: true });
@@ -160,12 +165,38 @@ export class DisciplinaList implements OnInit {
     this.carregar();
   }
 
+  onSort(sort: Sort): void {
+    this.sortActive.set(sort.active || 'nome');
+    this.sortDirection.set(sort.direction === 'desc' ? 'desc' : 'asc');
+    this.pageIndex.set(0);
+    this.carregar();
+  }
+
+  limparFiltros(): void {
+    this.buscaControl.setValue('');
+    this.cursoBuscaControl.setValue('');
+    this.selectedCursoNome = null;
+    this.cursoIdFiltro.set(null);
+    this.cursosSugestoes.set([]);
+    this.emptyCursos.set(false);
+  }
+
+  temFiltrosAtivos(): boolean {
+    return !!(this.nomeFiltro() || this.cursoIdFiltro());
+  }
+
   carregar(): void {
     this.disciplinaService
       .listar({
         page: this.pageIndex(),
         size: this.pageSize(),
-        sort: 'nome',
+        sort: toSpringSort(
+          {
+            active: this.sortActive(),
+            direction: this.sortDirection(),
+          },
+          'nome,asc',
+        ),
         nome: this.nomeFiltro() || undefined,
         cursoId: this.cursoIdFiltro() ?? undefined,
       })

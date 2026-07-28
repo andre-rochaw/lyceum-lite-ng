@@ -1,0 +1,23 @@
+:host {
+  display: block;
+  min-height: 100dvh;
+}
+
+.not-found-page {
+  min-height: inherit;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  box-sizing: border-box;
+}
+
+.not-found-card {
+  width: min(100%, 28rem);
+}
+
+.not-found-card p {
+  margin: 0.75rem 0 0;
+  line-height: 1.5;
+  opacity: 0.85;
+}
