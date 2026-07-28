@@ -1,20 +1,20 @@
-<div class="flex flex-wrap items-center justify-between gap-4 mb-4">
-  <h1 class="text-xl font-medium m-0">Disciplinas</h1>
+<div class="page-header">
+  <h1 class="page-title">Disciplinas</h1>
   <a mat-flat-button color="primary" routerLink="/disciplinas/novo">
     <mat-icon>add</mat-icon>
     Nova disciplina
   </a>
 </div>
 
-<div class="list-toolbar mb-4">
+<div class="list-toolbar">
   <mat-form-field appearance="outline" class="search-field" subscriptSizing="dynamic">
     <input
       matInput
       [formControl]="buscaControl"
-      placeholder="Pesquisar por nome"
-      aria-label="Pesquisar por nome"
+      placeholder="Buscar disciplinas por nome..."
+      aria-label="Buscar disciplinas por nome"
     />
-    <mat-icon matSuffix>search</mat-icon>
+    <mat-icon matPrefix>search</mat-icon>
   </mat-form-field>
 
   <mat-form-field appearance="outline" class="search-field" subscriptSizing="dynamic">
@@ -23,7 +23,7 @@
       matInput
       [formControl]="cursoBuscaControl"
       [matAutocomplete]="cursoAuto"
-      placeholder="Filtrar por curso"
+      placeholder="Filtrar por curso..."
       aria-label="Filtrar por curso"
       autocomplete="off"
     />
@@ -39,7 +39,7 @@
         <mat-option [value]="null">Nenhum curso encontrado</mat-option>
       }
     </mat-autocomplete>
-    <mat-icon matSuffix>search</mat-icon>
+    <mat-icon matPrefix>search</mat-icon>
   </mat-form-field>
 </div>
 
@@ -51,7 +51,7 @@
         Limpar filtros
       </button>
     } @else {
-      <p>Ainda nao existem disciplinas.</p>
+      <p>Ainda não existem disciplinas.</p>
       <a mat-flat-button color="primary" routerLink="/disciplinas/novo">
         <mat-icon>add</mat-icon>
         Criar disciplina

@@ -33,7 +33,7 @@ function apiError(status: number, message: string): HttpErrorResponse {
 
 users.set('demo@techne.com', {
   id: '1',
-  name: 'UsuÃ¡rio Demo',
+  name: 'Usuário Demo',
   email: 'demo@techne.com',
   password: 'Senha123',
   role: 'USER',

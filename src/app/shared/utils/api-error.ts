@@ -15,7 +15,7 @@ export function isApiError(value: unknown): value is ApiError {
   );
 }
 
-/** Extrai apenas a mensagem exibível no toast. */
+/** Extrai apenas a mensagem exibÃ­vel no toast. */
 export function extractApiErrorMessage(errorBody: unknown): string | null {
   if (isApiError(errorBody)) {
     return errorBody.message.trim();

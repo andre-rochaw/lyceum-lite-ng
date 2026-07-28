@@ -17,7 +17,7 @@ export interface AlunoRequest {
   dataNascimento: string;
 }
 
-/** Metadados mínimos do `Page` do Spring Data. */
+/** Metadados mÃ­nimos do `Page` do Spring Data. */
 export interface PageResponse<T> {
   content: T[];
   totalElements: number;

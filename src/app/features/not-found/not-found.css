@@ -8,16 +8,28 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 1.5rem;
+  padding: var(--app-space-6);
   box-sizing: border-box;
+  background: var(--app-color-bg);
 }
 
 .not-found-card {
   width: min(100%, 28rem);
+  border: 1px solid var(--app-color-border);
+  box-shadow: var(--app-elevation-1) !important;
+}
+
+.not-found-card .mat-mdc-card-title {
+  text-align: left;
+}
+
+.not-found-card .mat-mdc-card-subtitle {
+  text-align: left;
+  padding-left: 0;
 }
 
 .not-found-card p {
-  margin: 0.75rem 0 0;
-  line-height: 1.5;
-  opacity: 0.85;
+  margin: var(--app-space-3) 0 0;
+  line-height: 1.55;
+  color: var(--app-color-muted);
 }

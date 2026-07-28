@@ -1,47 +1,142 @@
 <mat-sidenav-container class="shell-container">
-  <mat-sidenav mode="side" opened class="shell-sidenav">
-    <div class="p-4 font-medium">Lyceum Lite</div>
-    <mat-nav-list>
-      <a mat-list-item routerLink="/home" routerLinkActive="active-link">
+  <mat-sidenav
+    [mode]="isMobile() ? 'over' : 'side'"
+    [opened]="sidenavOpened()"
+    (openedChange)="sidenavOpened.set($event)"
+    class="shell-sidenav"
+  >
+    <div class="shell-brand">
+      <img src="brand-logo.svg" alt="" class="shell-brand__logo" width="32" height="32" />
+      <div class="shell-brand__text">
+        <span class="shell-brand__name">Lyceum Lite</span>
+        <span class="shell-brand__tag">Acadêmico</span>
+      </div>
+    </div>
+
+    <div class="shell-nav-section">Navegação</div>
+
+    <mat-nav-list class="shell-nav">
+      <a
+        mat-list-item
+        routerLink="/home"
+        routerLinkActive="active-link"
+        (click)="isMobile() && sidenavOpened.set(false)"
+      >
         <mat-icon matListItemIcon>home</mat-icon>
         <span matListItemTitle>Home</span>
       </a>
-      <a mat-list-item routerLink="/alunos" routerLinkActive="active-link">
+      <a
+        mat-list-item
+        routerLink="/alunos"
+        routerLinkActive="active-link"
+        (click)="isMobile() && sidenavOpened.set(false)"
+      >
         <mat-icon matListItemIcon>school</mat-icon>
         <span matListItemTitle>Alunos</span>
       </a>
-      <a mat-list-item routerLink="/cursos" routerLinkActive="active-link">
+      <a
+        mat-list-item
+        routerLink="/cursos"
+        routerLinkActive="active-link"
+        (click)="isMobile() && sidenavOpened.set(false)"
+      >
         <mat-icon matListItemIcon>menu_book</mat-icon>
         <span matListItemTitle>Cursos</span>
       </a>
-      <a mat-list-item routerLink="/disciplinas" routerLinkActive="active-link">
+      <a
+        mat-list-item
+        routerLink="/disciplinas"
+        routerLinkActive="active-link"
+        (click)="isMobile() && sidenavOpened.set(false)"
+      >
         <mat-icon matListItemIcon>class</mat-icon>
         <span matListItemTitle>Disciplinas</span>
       </a>
-      <a mat-list-item routerLink="/turmas" routerLinkActive="active-link">
+      <a
+        mat-list-item
+        routerLink="/turmas"
+        routerLinkActive="active-link"
+        (click)="isMobile() && sidenavOpened.set(false)"
+      >
         <mat-icon matListItemIcon>groups</mat-icon>
         <span matListItemTitle>Turmas</span>
       </a>
-      <a mat-list-item routerLink="/matriculas" routerLinkActive="active-link">
+      <a
+        mat-list-item
+        routerLink="/matriculas"
+        routerLinkActive="active-link"
+        (click)="isMobile() && sidenavOpened.set(false)"
+      >
         <mat-icon matListItemIcon>assignment</mat-icon>
         <span matListItemTitle>Matrículas</span>
       </a>
-      <a mat-list-item (click)="logout()" (keyup.enter)="logout()" tabindex="0">
+    </mat-nav-list>
+
+    <div class="shell-sidenav__footer">
+      <div class="shell-divider"></div>
+      <a
+        mat-list-item
+        class="shell-logout"
+        (click)="logout()"
+        (keyup.enter)="logout()"
+        tabindex="0"
+        role="button"
+      >
         <mat-icon matListItemIcon>logout</mat-icon>
         <span matListItemTitle>Logout</span>
       </a>
-    </mat-nav-list>
+    </div>
   </mat-sidenav>
 
-  <mat-sidenav-content>
-    <mat-toolbar color="primary">
-      <span>Sistema Acadêmico</span>
-      <span class="flex-1"></span>
+  <mat-sidenav-content class="shell-content">
+    <mat-toolbar class="shell-toolbar">
+      <button
+        mat-icon-button
+        type="button"
+        class="shell-menu-btn"
+        aria-label="Abrir menu"
+        (click)="toggleSidenav()"
+      >
+        <mat-icon>menu</mat-icon>
+      </button>
+
+      <div class="shell-toolbar__titles">
+        <span class="shell-toolbar__title">Lyceum Lite</span>
+        <span class="shell-toolbar__subtitle">Sistema de Gestão Acadêmica</span>
+      </div>
+
+      <span class="shell-toolbar__spacer"></span>
+
+      <button
+        mat-icon-button
+        type="button"
+        [matMenuTriggerFor]="themeMenu"
+        [matTooltip]="'Tema: ' + theme.preference()"
+        aria-label="Alternar tema"
+      >
+        <mat-icon>{{ themeIcon() }}</mat-icon>
+      </button>
+      <mat-menu #themeMenu="matMenu">
+        <button mat-menu-item type="button" (click)="setTheme('light')">
+          <mat-icon>light_mode</mat-icon>
+          <span>Claro</span>
+        </button>
+        <button mat-menu-item type="button" (click)="setTheme('dark')">
+          <mat-icon>dark_mode</mat-icon>
+          <span>Escuro</span>
+        </button>
+        <button mat-menu-item type="button" (click)="setTheme('system')">
+          <mat-icon>desktop_windows</mat-icon>
+          <span>Sistema</span>
+        </button>
+      </mat-menu>
+
       @if (user(); as u) {
-        <span class="text-sm opacity-90">{{ u.name }}</span>
+        <span class="shell-user" [matTooltip]="u.email">{{ u.name }}</span>
       }
     </mat-toolbar>
-    <main class="p-6">
+
+    <main class="shell-main">
       <router-outlet />
     </main>
   </mat-sidenav-content>

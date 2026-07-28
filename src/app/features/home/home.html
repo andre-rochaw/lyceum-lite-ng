@@ -1,16 +1,37 @@
 @if (user(); as u) {
-  <mat-card class="max-w-xl">
-    <mat-card-header>
-      <mat-card-title>Bem-vindo, {{ u.name }}</mat-card-title>
-    </mat-card-header>
-    <mat-card-content class="pt-4 flex flex-col gap-2">
-      <p><strong>Nome:</strong> {{ u.name }}</p>
-      <p><strong>E-mail:</strong> {{ u.email }}</p>
-      <p><strong>Cargo:</strong> {{ u.role }}</p>
-      <p>
-        <strong>Último login:</strong>
-        {{ u.lastLogin ? (u.lastLogin | date: 'short') : '—' }}
+  <div class="home-page">
+    <header class="home-hero">
+      <p class="home-eyebrow">Lyceum Lite</p>
+      <h1 class="hero-title">Olá, {{ u.name }}</h1>
+      <p class="home-lead">
+        Gerencie o ciclo acadêmico de alunos, cursos, disciplinas, turmas e matrículas.
       </p>
-    </mat-card-content>
-  </mat-card>
+    </header>
+
+    <mat-card class="home-card">
+      <mat-card-header>
+        <mat-card-title class="section-title">Sua sessão</mat-card-title>
+      </mat-card-header>
+      <mat-card-content class="home-card__content">
+        <dl class="home-meta">
+          <div>
+            <dt>Nome</dt>
+            <dd>{{ u.name }}</dd>
+          </div>
+          <div>
+            <dt>E-mail</dt>
+            <dd>{{ u.email }}</dd>
+          </div>
+          <div>
+            <dt>Cargo</dt>
+            <dd>{{ u.role }}</dd>
+          </div>
+          <div>
+            <dt>Último login</dt>
+            <dd>{{ u.lastLogin ? (u.lastLogin | date: 'short') : '—' }}</dd>
+          </div>
+        </dl>
+      </mat-card-content>
+    </mat-card>
+  </div>
 }

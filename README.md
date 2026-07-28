@@ -1,40 +1,40 @@
-# Lyceum Lite NG ? Frontend Angular
+# Lyceum Lite NG â€” Frontend Angular
 
-Frontend Angular do **Sistema Acadêmico de Matrículas**. Consome a API Spring Boot (`api`) para autenticação, CRUD acadêmico e fluxo de matrículas (criar, confirmar, cancelar), com UI **Angular Material first**.
+Frontend Angular do **Sistema AcadÃªmico de MatrÃ­culas**. Consome a API Spring Boot (`api`) para autenticaÃ§Ã£o, CRUD acadÃªmico e fluxo de matrÃ­culas (criar, confirmar, cancelar), com UI **Angular Material first**.
 
-Este README cobre **somente** o módulo `lyceum-lite-ng`. Documentação da API: [`../api/README.md`](../api/README.md).
+Este README cobre **somente** o mÃ³dulo `lyceum-lite-ng`. DocumentaÃ§Ã£o da API: [`../api/README.md`](../api/README.md).
 
 ---
 
-## Sumário
+## SumÃ¡rio
 
-1. [Pré-requisitos](#pré-requisitos)
+1. [PrÃ©-requisitos](#prÃ©-requisitos)
 2. [Como rodar localmente](#como-rodar-localmente)
 3. [Proxy e ambientes](#proxy-e-ambientes)
 4. [Tecnologias](#tecnologias)
-5. [Arquitetura e organização](#arquitetura-e-organização)
-6. [Autenticação e sessão](#autenticação-e-sessão)
+5. [Arquitetura e organizaÃ§Ã£o](#arquitetura-e-organizaÃ§Ã£o)
+6. [AutenticaÃ§Ã£o e sessÃ£o](#autenticaÃ§Ã£o-e-sessÃ£o)
 7. [Telas e rotas](#telas-e-rotas)
 8. [Como validar os fluxos principais](#como-validar-os-fluxos-principais)
-9. [Como validar matrícula e limite de vagas](#como-validar-matrícula-e-limite-de-vagas)
+9. [Como validar matrÃ­cula e limite de vagas](#como-validar-matrÃ­cula-e-limite-de-vagas)
 10. [Campanha SDD ? PBIs e Phase Specs](#campanha-sdd--pbis-e-phase-specs)
-11. [Decisões de implementação](#decisões-de-implementação)
-12. [Limitações conhecidas](#limitações-conhecidas)
+11. [DecisÃµes de implementaÃ§Ã£o](#decisÃµes-de-implementaÃ§Ã£o)
+12. [LimitaÃ§Ãµes conhecidas](#limitaÃ§Ãµes-conhecidas)
 13. [Uso de IA](#uso-de-ia)
-14. [Trechos críticos](#trechos-críticos)
+14. [Trechos crÃ­ticos](#trechos-crÃ­ticos)
 
 ---
 
-## Pré-requisitos
+## PrÃ©-requisitos
 
-| Item | Observação |
+| Item | ObservaÃ§Ã£o |
 |------|------------|
-| Node.js | Compatível com Angular 22 (recomendado **Node 20+ LTS**) |
+| Node.js | CompatÃ­vel com Angular 22 (recomendado **Node 20+ LTS**) |
 | npm | Projeto usa `packageManager: npm@10.9.8` |
-| API Spring | Em **http://localhost:8080** (padrão da campanha) |
+| API Spring | Em **http://localhost:8080** (padrÃ£o da campanha) |
 | Banco | SQL Server configurado conforme [`../api/README.md`](../api/README.md) |
 
-Sem a API no ar, o modo padrão (`npm start`) **não** completa os fluxos de domínio. Existe um mock só de auth (`npm run start:mock`) ? **não** use nos testes oficiais da campanha.
+Sem a API no ar, o modo padrÃ£o (`npm start`) **nÃ£o** completa os fluxos de domÃ­nio. Existe um mock sÃ³ de auth (`npm run start:mock`) ? **nÃ£o** use nos testes oficiais da campanha.
 
 ---
 
@@ -49,7 +49,7 @@ cd ../api
 
 Confirme Swagger/login em http://localhost:8080 (detalhes no README da API).
 
-### 2) Subir o Angular (API real ? padrão)
+### 2) Subir o Angular (API real â€” padrÃ£o)
 
 ```bash
 cd lyceum-lite-ng
@@ -61,26 +61,26 @@ Abre em **http://localhost:4200/**.
 
 Atalho equivalente: `npm run start:api`.
 
-### 3) Build de produção (opcional)
+### 3) Build de produÃ§Ã£o (opcional)
 
 ```bash
 npm run build
 ```
 
-Saída em `dist/lyceum-lite-ng/`.
+SaÃ­da em `dist/lyceum-lite-ng/`.
 
-### Mock de autenticação (opcional)
+### Mock de autenticaÃ§Ã£o (opcional)
 
-Somente se a API estiver fora do ar e você quiser exercitar login/shell:
+Somente se a API estiver fora do ar e vocÃª quiser exercitar login/shell:
 
 ```bash
 npm run start:mock
 ```
 
 - Ambiente: `environment.mock.ts` (`useMockAuth: true`)
-- Usuário seed: `demo@techne.com` / `Senha123`
-- **Não** cobre CRUD/matrículas reais
-- F5 **não** recupera sessão no mock
+- UsuÃ¡rio seed: `demo@techne.com` / `Senha123`
+- **NÃ£o** cobre CRUD/matrÃ­culas reais
+- F5 **nÃ£o** recupera sessÃ£o no mock
 
 ---
 
@@ -91,21 +91,21 @@ npm run start:mock
 `proxy.conf.json` encaminha:
 
 ```
-/api  ?  http://localhost:8080
+/api  â†’  http://localhost:8080
 ```
 
 com `pathRewrite` removendo o prefixo `/api`.  
-Exemplo: front chama `/api/matriculas` ? backend recebe `/matriculas`.
+Exemplo: front chama `/api/matriculas` â†’ backend recebe `/matriculas`.
 
 ### Environments
 
 | Arquivo | Uso |
 |---------|-----|
-| `src/environments/environment.development.ts` | Dev padrão (`useMockAuth: false`, `apiUrl: '/api'`) |
-| `src/environments/environment.ts` | Produção |
-| `src/environments/environment.mock.ts` | Só com `npm run start:mock` |
+| `src/environments/environment.development.ts` | Dev padrÃ£o (`useMockAuth: false`, `apiUrl: '/api'`) |
+| `src/environments/environment.ts` | ProduÃ§Ã£o |
+| `src/environments/environment.mock.ts` | SÃ³ com `npm run start:mock` |
 
-Não é necessário alterar URL da API no dia a dia: o proxy resolve o ambiente local.
+NÃ£o Ã© necessÃ¡rio alterar URL da API no dia a dia: o proxy resolve o ambiente local.
 
 ---
 
@@ -115,111 +115,111 @@ Não é necessário alterar URL da API no dia a dia: o proxy resolve o ambiente loc
 |--------|---------|
 | Framework | **Angular 22** |
 | UI | **Angular Material 3** + CDK |
-| Layout utilitário | Tailwind CSS 4 |
+| Layout utilitÃ¡rio | Tailwind CSS 4 |
 | Estado | **Signals** (sem NgRx) |
 | HTTP | `HttpClient` + interceptors |
 | Forms | Reactive Forms |
 | Linguagem | TypeScript ~6 |
-| Teste unitário (scaffold) | Vitest (`ng test`) |
+| Teste unitÃ¡rio (scaffold) | Vitest (`ng test`) |
 
-Pacote `motion` está no `package.json`, mas **não é requisito** da campanha (pode ser ignorado).
+Pacote `motion` estÃ¡ no `package.json`, mas **nÃ£o Ã© requisito** da campanha (pode ser ignorado).
 
 ---
 
-## Arquitetura e organização
+## Arquitetura e organizaÃ§Ã£o
 
 ```
 lyceum-lite-ng/src/app/
-??? core/
-?   ??? auth/              # AuthService, modelos
-?   ??? guards/            # authGuard, guestGuard
-?   ??? interceptors/      # auth, refresh, loading, error, mock
-?   ??? services/          # NotificationService, LoadingService
-??? layouts/
-?   ??? auth-layout/       # login / register
-?   ??? main-layout/       # shell (toolbar + sidenav)
-??? features/
-?   ??? auth/              # login, register
-?   ??? home/
-?   ??? alunos/
-?   ??? cursos/
-?   ??? disciplinas/
-?   ??? turmas/
-?   ??? matriculas/
-??? shared/                # utils / animações (sem design system)
+â”œâ”€â”€ core/
+â”‚   â”œâ”€â”€ auth/              # AuthService, modelos
+â”‚   â”œâ”€â”€ guards/            # authGuard, guestGuard
+â”‚   â”œâ”€â”€ interceptors/      # auth, refresh, loading, error, mock
+â”‚   â””â”€â”€ services/          # NotificationService, LoadingService
+â”œâ”€â”€ layouts/
+â”‚   â”œâ”€â”€ auth-layout/       # login / register
+â”‚   â””â”€â”€ main-layout/       # shell (toolbar + sidenav)
+â”œâ”€â”€ features/
+â”‚   â”œâ”€â”€ auth/              # login, register
+â”‚   â”œâ”€â”€ home/
+â”‚   â”œâ”€â”€ alunos/
+â”‚   â”œâ”€â”€ cursos/
+â”‚   â”œâ”€â”€ disciplinas/
+â”‚   â”œâ”€â”€ turmas/
+â”‚   â””â”€â”€ matriculas/
+â””â”€â”€ shared/                # utils / animaÃ§Ãµes (sem design system)
 ```
 
-Padrão por feature de domínio:
+PadrÃ£o por feature de domÃ­nio:
 
 ```
 features/<dominio>/
-??? models/
-??? data/<dominio>.service.ts    # HTTP
-??? pages/?-list | ?-form
-??? components/                  # dialogs de exclusão, pickers
-??? <dominio>.routes.ts          # lazy
+â”œâ”€â”€ models/
+â”œâ”€â”€ data/<dominio>.service.ts    # HTTP
+â”œâ”€â”€ pages/*-list | *-form
+â”œâ”€â”€ components/                  # dialogs de exclusÃ£o, pickers
+â””â”€â”€ <dominio>.routes.ts          # lazy
 ```
 
-**Separation of Concerns:** regras de matrícula/vagas ficam no **backend**. O front apenas chama a API e exibe sucesso/erro (SnackBar / interceptor).
+**Separation of Concerns:** regras de matrÃ­cula/vagas ficam no **backend**. O front apenas chama a API e exibe sucesso/erro (SnackBar / interceptor).
 
 ---
 
-## Autenticação e sessão
+## AutenticaÃ§Ã£o e sessÃ£o
 
 ### Endpoints consumidos (API real)
 
-| Ação | Path (via proxy) |
+| AÃ§Ã£o | Path (via proxy) |
 |------|------------------|
 | Cadastro | `POST /api/usuario/criar` |
 | Login | `POST /api/usuario/login` ? JSON `{ "token": "..." }` |
 | Me | `GET /api/usuario/por-token-jwt` |
 | Logout | `POST /api/usuario/logout` |
-| Refresh | `POST /api/usuario/refresh` (cookie HttpOnly; ver limitações) |
+| Refresh | `POST /api/usuario/refresh` (cookie HttpOnly; ver limitaÃ§Ãµes) |
 
 Cadastro na UI: Nome, E-mail, CPF (`999.999.999-99`), Senha, Confirmar senha.  
-Após cadastro ? redireciona para `/login` (não autentica automaticamente).
+ApÃ³s cadastro â†’ redireciona para `/login` (nÃ£o autentica automaticamente).
 
-### Modelo de sessão
+### Modelo de sessÃ£o
 
-- **Access token** só em memória (`signal` no `AuthService`) ? não em `localStorage`
+- **Access token** sÃ³ em memÃ³ria (`signal` no `AuthService`) â€” nÃ£o em `localStorage`
 - **Refresh** via cookie HttpOnly + `withCredentials`
 - `authInterceptor` injeta `Authorization: Bearer ?`
-- `refreshInterceptor` tenta renovar após 401
-- `errorInterceptor` ? SnackBar (inclui **409** de regra)
-- `loadingInterceptor` ? spinner global
+- `refreshInterceptor` tenta renovar apÃ³s 401
+- `errorInterceptor` â†’ SnackBar (inclui **409** de regra)
+- `loadingInterceptor` â†’ spinner global
 
 ### Guards
 
 | Guard | Rotas | Comportamento |
 |-------|-------|----------------|
-| `authGuard` | shell (`/home`, CRUDs, matrículas) | Sem sessão ? `ensureSession()`; falha ? `/login` |
-| `guestGuard` | `/login`, `/register` | Já autenticado na SPA ? `/home` |
+| `authGuard` | shell (`/home`, CRUDs, matrÃ­culas) | Sem sessÃ£o â†’ `ensureSession()`; falha â†’ `/login` |
+| `guestGuard` | `/login`, `/register` | JÃ¡ autenticado na SPA â†’ `/home` |
 
 ---
 
 ## Telas e rotas
 
-| Rota | Feature | Guard | Observação |
+| Rota | Feature | Guard | ObservaÃ§Ã£o |
 |------|---------|-------|------------|
-| `/login`, `/register` | Auth | Guest | Layout público |
+| `/login`, `/register` | Auth | Guest | Layout pÃºblico |
 | `/home` | Home | Auth | Landing autenticada |
 | `/alunos`, `/alunos/novo`, `/alunos/:id/editar` | Alunos | Auth | CRUD + dialog excluir |
-| `/cursos`, ? | Cursos | Auth | CRUD |
-| `/disciplinas`, ? | Disciplinas | Auth | Autocomplete de Curso |
-| `/turmas`, ? | Turmas | Auth | Vagas, status, vínculo Disciplina |
-| `/matriculas` | Matrículas | Auth | Lista + confirmar/cancelar |
-| `/matriculas/novo` | Matrículas | Auth | Criar (só `alunoId` + `turmaId`) |
+| `/cursos`, â€¦ | Cursos | Auth | CRUD |
+| `/disciplinas`, â€¦ | Disciplinas | Auth | Autocomplete de Curso |
+| `/turmas`, â€¦ | Turmas | Auth | Vagas (ocupadas/limite), status chip, vÃ­nculo Disciplina |
+| `/matriculas` | MatrÃ­culas | Auth | Lista + confirmar/cancelar (dialog) |
+| `/matriculas/novo` | MatrÃ­culas | Auth | Criar (sÃ³ `alunoId` + `turmaId`) + resumo da turma |
+| `**` | 404 | - | PÃ¡gina nÃ£o encontrada |
 
-Menu do shell: Home, Alunos, Cursos, Disciplinas, Turmas, Matrículas, Logout.
+Menu do shell: Home, Alunos, Cursos, Disciplinas, Turmas, MatrÃ­culas, Logout.
 
-### Matrículas (comportamento UI)
+### MatrÃ­culas (comportamento UI)
 
-- Listagem: `MatTable` + paginação **server-side**; filtros `alunoId`, `turmaId`, `status`
-- Criar: dual `MatAutocomplete` (Aluno + Turma); submit só UUIDs; status inicial vem `PENDENTE` da API
-- **Confirmar** visível se `PENDENTE`
-- **Cancelar** se `PENDENTE` ou `CONFIRMADA`
-- Sem ações se `CANCELADA`
-- Sem rota de editar / sem `DELETE` de matrícula
+- Listagem: `MatTable` + paginaÃ§Ã£o/ordenaÃ§Ã£o **server-side** (`MatSort` â†’ `sort` do Pageable); filtros `alunoId`, `turmaId`, `status`; status com `MatChip`
+- Criar: busca de aluno + picker de turma; submit sÃ³ UUIDs; status inicial `PENDENTE` na API; resumo da turma (disciplina, curso, status, vagas) antes de salvar
+- **Confirmar** / **Cancelar** com `MatDialog` de confirmaÃ§Ã£o (visÃ­veis conforme status)
+- Empty state com CTA quando nÃ£o hÃ¡ registros
+- Sem rota de editar / sem `DELETE` de matrÃ­cula
 
 ---
 
@@ -228,31 +228,31 @@ Menu do shell: Home, Alunos, Cursos, Disciplinas, Turmas, Matrículas, Logout.
 Com API + front no ar:
 
 1. Abra http://localhost:4200/login  
-2. Cadastre um usuário (ou use um já criado na API)  
-3. Faça login ? deve cair no shell (`/home`) com sidenav  
-4. **Cursos** ? criar um curso  
-5. **Disciplinas** ? criar vinculada ao curso  
-6. **Turmas** ? criar com status **ABERTA**, `limiteVagas` ? 1  
-7. **Alunos** ? criar aluno  
-8. **Matrículas** ? Nova matrícula ? selecionar aluno e turma ? salvar  
-9. Na listagem ? **Confirmar** ? status `CONFIRMADA`  
+2. Cadastre um usuÃ¡rio (ou use um jÃ¡ criado na API)  
+3. FaÃ§a login â†’ deve cair no shell (`/home`) com sidenav  
+4. **Cursos** â†’ criar um curso  
+5. **Disciplinas** â†’ criar vinculada ao curso  
+6. **Turmas** â†’ criar com status **ABERTA**, `limiteVagas` ? 1  
+7. **Alunos** â†’ criar aluno  
+8. **MatrÃ­culas** â†’ Nova matrÃ­cula â†’ selecionar aluno e turma ? salvar  
+9. Na listagem â†’ **Confirmar** â†’ status `CONFIRMADA`  
 10. Em **Turmas**, conferir `vagasOcupadas` incrementado  
-11. **Cancelar** matrícula confirmada ? vaga liberada  
+11. **Cancelar** matrÃ­cula confirmada ? vaga liberada  
 
-Erros de regra (turma não aberta, duplicidade, sem vaga) devem aparecer no SnackBar como **409** com mensagem da API.
+Erros de regra (turma nÃ£o aberta, duplicidade, sem vaga) devem aparecer no SnackBar como **409** com mensagem da API.
 
 ---
 
-## Como validar matrícula e limite de vagas
+## Como validar matrÃ­cula e limite de vagas
 
 1. Crie turma `ABERTA` com **limite de vagas = 1**.  
 2. Crie dois alunos (A e B).  
-3. Matricule A ? confirme ? ocupação = 1.  
+3. Matricule A â†’ confirme â†’ ocupaÃ§Ã£o = 1.  
 4. Matricule B (fica `PENDENTE`).  
-5. Tente **Confirmar** B ? SnackBar de conflito (409: sem vagas); B permanece `PENDENTE`.  
-6. Cancele A (confirmada) ? ocupação volta; confirme B ? deve funcionar.
+5. Tente **Confirmar** B â†’ SnackBar de conflito (409: sem vagas); B permanece `PENDENTE`.  
+6. Cancele A (confirmada) â†’ ocupaÃ§Ã£o volta; confirme B ? deve funcionar.
 
-O front **não** recalcula vagas localmente ? a verdade está na API (`MatriculaService` no backend).
+O front **nÃ£o** recalcula vagas localmente â€” a verdade estÃ¡ na API (`MatriculaService` no backend).
 
 ---
 
@@ -264,91 +264,91 @@ Desenvolvimento por **Specification Driven Development** (`docs/guia-campanha.md
 
 ```
 PBI (pbis/ng)
-  ? Phase Spec (docs/phases) EM_REVISÃO
-  ? aprovação das decisões D-XX (revisão humana)
-  ? implementação (código) ? Phase Spec IMPLEMENTADA
-  ? Test Strategy / validação manual
-  ? próximo PBI
+  â†’ Phase Spec (docs/phases) EM_REVISÃƒO
+  â†’ aprovaÃ§Ã£o das decisÃµes D-XX (revisÃ£o humana)
+  â†’ implementaÃ§Ã£o (cÃ³digo) â†’ Phase Spec IMPLEMENTADA
+  â†’ Test Strategy / validaÃ§Ã£o manual
+  â†’ prÃ³ximo PBI
 ```
 
 ### PBIs do frontend
 
 | PBI | Escopo | Phase Spec | Status |
 |-----|--------|------------|--------|
-| **F-001** | Autenticação, shell, interceptors, guards | `docs/phases/F-001-phase-spec.md` | IMPLEMENTADA |
-| **F-002** | Módulo Alunos | `docs/phases/F-002-phase-spec.md` | IMPLEMENTADA |
-| **F-003** | Módulo Cursos | `docs/phases/F-003-phase-spec.md` | IMPLEMENTADA |
-| **F-004** | Módulo Disciplinas | `docs/phases/F-004-phase-spec.md` | IMPLEMENTADA |
-| **F-005** | Módulo Turmas | `docs/phases/F-005-phase-spec.md` | IMPLEMENTADA |
-| **F-006** | Módulo Matrículas | `docs/phases/F-006-phase-spec.md` | IMPLEMENTADA |
+| **F-001** | AutenticaÃ§Ã£o, shell, interceptors, guards | `docs/phases/F-001-phase-spec.md` | IMPLEMENTADA |
+| **F-002** | MÃ³dulo Alunos | `docs/phases/F-002-phase-spec.md` | IMPLEMENTADA |
+| **F-003** | MÃ³dulo Cursos | `docs/phases/F-003-phase-spec.md` | IMPLEMENTADA |
+| **F-004** | MÃ³dulo Disciplinas | `docs/phases/F-004-phase-spec.md` | IMPLEMENTADA |
+| **F-005** | MÃ³dulo Turmas | `docs/phases/F-005-phase-spec.md` | IMPLEMENTADA |
+| **F-006** | MÃ³dulo MatrÃ­culas | `docs/phases/F-006-phase-spec.md` | IMPLEMENTADA |
 
 PBIs em: `pbis/ng/`.
 
-### Revisão manual
+### RevisÃ£o manual
 
 Em cada PBI frontend:
 
-1. **Aprovar Phase Spec** ? contratos TS alinhados à API real (A-00x), rotas, Material first, o que fica fora de escopo.  
-2. **Executar** ? implementar sem reabrir auth nem inventar endpoints.  
-3. **Validar na UI** ? Network (payloads), SnackBar 400/404/409, regressão das features anteriores.  
-4. **Matrículas (F-006)** ? revisar que o client **não** reimplementa RNs de vaga/duplicidade.
+1. **Aprovar Phase Spec** â†’ contratos TS alinhados Ã  API real (A-00x), rotas, Material first, o que fica fora de escopo.  
+2. **Executar** â†’ implementar sem reabrir auth nem inventar endpoints.  
+3. **Validar na UI** â†’ Network (payloads), SnackBar 400/404/409, regressÃ£o das features anteriores.  
+4. **MatrÃ­culas (F-006)** â†’ revisar que o client **nÃ£o** reimplementa RNs de vaga/duplicidade.
 
 ---
 
-## Decisões de implementação
+## DecisÃµes de implementaÃ§Ã£o
 
-1. **Material first** ? sem `shared/ui` genérico; Tailwind só layout.  
+1. **Material first** â€” sem `shared/ui` genÃ©rico; Tailwind sÃ³ layout.  
 2. **Features isoladas** + lazy routes.  
-3. **Proxy `/api`** ? front e API em portas diferentes sem CORS complexo no dia a dia.  
-4. **Access token em memória** + cookie HttpOnly para refresh.  
+3. **Proxy `/api`** â€” front e API em portas diferentes sem CORS complexo no dia a dia.  
+4. **Access token em memÃ³ria** + cookie HttpOnly para refresh.  
 5. **Signals** para estado local; sem store global.  
-6. **RNs só no backend** ? front exibe resultado (D-08 da F-006).  
-7. **Matrícula sem editar/excluir** ? só criar + confirmar/cancelar.  
-8. **Autocompletes** (debounce + empty state) para vínculos (curso/disciplina/turma/aluno).  
-9. **Paginação server-side** nas listagens.  
-10. **Mock de auth opcional** ? campanha valida sempre contra API real.
+6. **RNs sÃ³ no backend** â€” front exibe resultado (D-08 da F-006).  
+7. **MatrÃ­cula sem editar/excluir** â€” sÃ³ criar + confirmar/cancelar.  
+8. **Autocompletes** (debounce + empty state) para vÃ­nculos (curso/disciplina/turma/aluno).  
+9. **PaginaÃ§Ã£o e ordenaÃ§Ã£o server-side** nas listagens (`MatPaginator` + `MatSort` â†’ Pageable).  
+10. **Mock de auth opcional** â€” campanha valida sempre contra API real.
 
 ---
 
-## Limitações conhecidas
+## LimitaÃ§Ãµes conhecidas
 
-- Depende da API em `:8080`; sem backend, domínio acadêmico não funciona.  
-- Mock cobre só autenticação, não Alunos/Cursos/?/Matrículas.  
-- Endpoint `POST /usuario/refresh` é chamado pelo front; se a API do ambiente não expuser o recurso, F5 / silent refresh podem falhar (login novo resolve).  
+- Depende da API em `:8080`; sem backend, domÃ­nio acadÃªmico nÃ£o funciona.  
+- Mock cobre sÃ³ autenticaÃ§Ã£o, nÃ£o Alunos/Cursos/â€¦/MatrÃ­culas.  
+- Endpoint `POST /usuario/refresh` Ã© chamado pelo front; se a API do ambiente nÃ£o expuser o recurso, F5 / silent refresh podem falhar (login novo resolve).  
 - Alguns labels do shell podem exibir encoding quebrado em acentos (arquivo legado ISO/UTF-8).  
-- Pacote `motion` instalado, mas não é parte do fluxo obrigatório.  
-- E2E automatizado não é obrigatório nesta campanha.  
+- Pacote `motion` instalado, mas nÃ£o Ã© parte do fluxo obrigatÃ³rio.  
+- E2E automatizado nÃ£o Ã© obrigatÃ³rio nesta campanha.  
 - F-006 documenta feedback de 409; a fonte da verdade das RNs continua sendo A-005 / `MatriculaService` na API.
 
 ---
 
 ## Uso de IA
 
-Ferramentas de IA (Cursor / agentes) apoiaram a campanha SDD e a implementação Angular.
+Ferramentas de IA (Cursor / agentes) apoiaram a campanha SDD e a implementaÃ§Ã£o Angular.
 
-| Parte | Uso de IA | Revisão manual |
+| Parte | Uso de IA | RevisÃ£o manual |
 |-------|-----------|----------------|
-| Phase Specs F-001?F-006 | Rascunho D-XX / CA-XX / escopo | Aprovação vs PBI e contrato real da API |
-| Fundação auth (F-001) | Guards, interceptors, layouts | Sessão em memória, proxy, fluxo login/cadastro |
-| Features Alunos?Turmas | List/form Material + services HTTP | CRUD ponta a ponta, dialogs de exclusão |
-| Feature Matrículas (F-006) | Lista, form, autocompletes, confirmar/cancelar | Body só `alunoId`/`turmaId`; 409 no SnackBar; sem RN no client |
+| Phase Specs F-001â€“F-006 | Rascunho D-XX / CA-XX / escopo | AprovaÃ§Ã£o vs PBI e contrato real da API |
+| FundaÃ§Ã£o auth (F-001) | Guards, interceptors, layouts | SessÃ£o em memÃ³ria, proxy, fluxo login/cadastro |
+| Features Alunosâ€“Turmas | List/form Material + services HTTP | CRUD ponta a ponta, dialogs de exclusÃ£o |
+| Feature MatrÃ­culas (F-006) | Lista, form, autocompletes, confirmar/cancelar | Body sÃ³ `alunoId`/`turmaId`; 409 no SnackBar; sem RN no client |
 | Este README | Estrutura e roteiro | Alinhamento com rotas, environments e Phase Specs |
 
-**Revisão crítica:** payloads de matrícula, ações condicionadas ao status, e não mutar `vagasOcupadas` na UI.
+**RevisÃ£o crÃ­tica:** payloads de matrÃ­cula, aÃ§Ãµes condicionadas ao status, e nÃ£o mutar `vagasOcupadas` na UI.
 
 ---
 
-## Trechos críticos
+## Trechos crÃ­ticos
 
 1. **`AuthService`** ? login/register/me/logout; token em Signal.  
 2. **Interceptors** ? Bearer, 401?refresh, erros?SnackBar, loading.  
-3. **`authGuard` / `guestGuard`** ? proteção do shell.  
+3. **`authGuard` / `guestGuard`** â€” proteÃ§Ã£o do shell.  
 4. **`MatriculaService` (HTTP)** ? listar/criar/confirmar/cancelar.  
-5. **`matricula-form` / `matricula-list`** ? autocomplete + ações de status sem reimplementar regras.
+5. **`matricula-form` / `matricula-list`** â€” autocomplete + aÃ§Ãµes de status sem reimplementar regras.
 
 ---
 
-## Referências
+## ReferÃªncias
 
 | Artefato | Caminho |
 |----------|---------|
@@ -358,11 +358,11 @@ Ferramentas de IA (Cursor / agentes) apoiaram a campanha SDD e a implementação A
 | PBIs NG | `pbis/ng/` |
 | Phase Specs | `docs/phases/F-00*.md` |
 | README da API | `api/README.md` |
-| Testes unitários API | `README-tests.md` |
+| Testes unitÃ¡rios API | `README-tests.md` |
 
 ---
 
-## Resumo rápido
+## Resumo rÃ¡pido
 
 ```bash
 # Terminal 1 ? API
@@ -373,5 +373,5 @@ cd lyceum-lite-ng
 npm install
 npm start
 # http://localhost:4200
-# login ? Cursos ? Disciplinas ? Turmas (ABERTA) ? Alunos ? Matrículas
+# login â†’ Cursos â†’ Disciplinas â†’ Turmas (ABERTA) â†’ Alunos â†’ MatrÃ­culas
 ```

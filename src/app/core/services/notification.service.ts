@@ -11,7 +11,7 @@ export class NotificationService {
   private readonly snackBar = inject(MatSnackBar);
 
   success(message: string): void {
-    this.snackBar.open(message, 'Fechar', {
+    this.open(message, 'Fechar', {
       ...TOAST_POSITION,
       duration: 3500,
       panelClass: ['snack-success'],
@@ -19,7 +19,7 @@ export class NotificationService {
   }
 
   error(message: string): void {
-    this.snackBar.open(message, 'Fechar', {
+    this.open(message, 'Fechar', {
       ...TOAST_POSITION,
       duration: 5000,
       panelClass: ['snack-error'],
@@ -27,9 +27,15 @@ export class NotificationService {
   }
 
   info(message: string): void {
-    this.snackBar.open(message, 'Fechar', {
+    this.open(message, 'Fechar', {
       ...TOAST_POSITION,
       duration: 3500,
+      panelClass: ['snack-info'],
     });
+  }
+
+  private open(message: string, action: string, config: MatSnackBarConfig): void {
+    this.snackBar.dismiss();
+    this.snackBar.open(message, action, config);
   }
 }

@@ -1,7 +1,11 @@
 <mat-card class="auth-card register-card">
+  <div class="auth-brand">
+    <img src="brand-logo.svg" alt="" width="40" height="40" class="auth-brand__logo" />
+    <span class="auth-brand__name">Lyceum Lite</span>
+  </div>
   <mat-card-header>
     <mat-card-title>Criar conta</mat-card-title>
-    <mat-card-subtitle>Cadastro de um novo usuario</mat-card-subtitle>
+    <mat-card-subtitle>Cadastro de um novo usuário</mat-card-subtitle>
   </mat-card-header>
 
   <mat-card-content class="auth-card__content">
@@ -10,7 +14,7 @@
         <mat-label>Nome</mat-label>
         <input matInput formControlName="name" autocomplete="name" />
         @if (form.controls.name.touched && form.controls.name.hasError('required')) {
-          <mat-error>Nome obrigatorio</mat-error>
+          <mat-error>Nome obrigatório</mat-error>
         }
       </mat-form-field>
 
@@ -18,7 +22,7 @@
         <mat-label>E-mail</mat-label>
         <input matInput type="email" formControlName="email" autocomplete="username" />
         @if (form.controls.email.touched && form.controls.email.invalid) {
-          <mat-error>Informe um e-mail valido</mat-error>
+          <mat-error>Informe um e-mail válido</mat-error>
         }
       </mat-form-field>
 
@@ -35,16 +39,16 @@
         />
         <mat-hint>Formato: 999.999.999-99</mat-hint>
         @if (form.controls.cpf.touched && form.controls.cpf.invalid) {
-          <mat-error>CPF invalido (use 999.999.999-99)</mat-error>
+          <mat-error>CPF inválido (use 999.999.999-99)</mat-error>
         }
       </mat-form-field>
 
       <mat-form-field appearance="outline">
         <mat-label>Senha</mat-label>
         <input matInput type="password" formControlName="password" autocomplete="new-password" />
-        <mat-hint>Min. 8 caracteres, uma maiuscula e um numero</mat-hint>
+        <mat-hint>Mín. 8 caracteres, uma maiúscula e um número</mat-hint>
         @if (form.controls.password.touched && form.controls.password.invalid) {
-          <mat-error>Senha invalida (min. 8, 1 maiuscula e 1 numero)</mat-error>
+          <mat-error>Senha inválida (mín. 8, 1 maiúscula e 1 número)</mat-error>
         }
       </mat-form-field>
 
@@ -59,7 +63,7 @@
         @if (form.controls.confirmPassword.touched && form.controls.confirmPassword.hasError('required')) {
           <mat-error>Confirme a senha</mat-error>
         } @else if (form.hasError('passwordsMismatch') && form.controls.confirmPassword.touched) {
-          <mat-error>As senhas nao coincidem</mat-error>
+          <mat-error>As senhas não coincidem</mat-error>
         }
       </mat-form-field>
 
@@ -70,6 +74,6 @@
   </mat-card-content>
 
   <mat-card-actions align="end">
-    <a mat-button routerLink="/login">Ja tenho conta</a>
+    <a mat-button routerLink="/login">Já tenho conta</a>
   </mat-card-actions>
 </mat-card>

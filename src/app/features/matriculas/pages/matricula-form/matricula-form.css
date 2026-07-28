@@ -8,27 +8,29 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 1rem;
+  padding: var(--app-space-6);
   box-sizing: border-box;
 }
 
 .matricula-form-card {
   width: min(100%, 640px);
   box-sizing: border-box;
+  border: 1px solid var(--app-color-border);
+  box-shadow: var(--app-elevation-1) !important;
 }
 
 .matricula-form {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
-  margin-top: 0.5rem;
+  gap: var(--app-space-2);
+  margin-top: var(--app-space-2);
 }
 
 .turma-field-row {
   display: flex;
   flex-wrap: wrap;
   align-items: flex-start;
-  gap: 0.75rem;
+  gap: var(--app-space-3);
 }
 
 .turma-field {
@@ -37,13 +39,13 @@
 }
 
 .turma-search-btn {
-  margin-top: 0.25rem;
+  margin-top: var(--app-space-1);
 }
 
 .matricula-form__actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.75rem;
+  gap: var(--app-space-3);
   justify-content: flex-end;
-  margin-top: 0.5rem;
+  margin-top: var(--app-space-2);
 }

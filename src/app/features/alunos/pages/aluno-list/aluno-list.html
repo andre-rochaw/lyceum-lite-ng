@@ -1,20 +1,20 @@
-<div class="flex flex-wrap items-center justify-between gap-4 mb-4">
-  <h1 class="text-xl font-medium m-0">Alunos</h1>
+<div class="page-header">
+  <h1 class="page-title">Alunos</h1>
   <a mat-flat-button color="primary" routerLink="/alunos/novo">
     <mat-icon>person_add</mat-icon>
     Novo aluno
   </a>
 </div>
 
-<div class="list-toolbar mb-4">
+<div class="list-toolbar">
   <mat-form-field appearance="outline" class="search-field" subscriptSizing="dynamic">
     <input
       matInput
       [formControl]="buscaControl"
-      placeholder="Pesquisar por nome"
-      aria-label="Pesquisar por nome"
+      placeholder="Buscar alunos por nome..."
+      aria-label="Buscar alunos por nome"
     />
-    <mat-icon matSuffix>search</mat-icon>
+    <mat-icon matPrefix>search</mat-icon>
   </mat-form-field>
 </div>
 
@@ -26,7 +26,7 @@
         Limpar busca
       </button>
     } @else {
-      <p>Ainda nao existem alunos.</p>
+      <p>Ainda não existem alunos.</p>
       <a mat-flat-button color="primary" routerLink="/alunos/novo">
         <mat-icon>person_add</mat-icon>
         Criar aluno

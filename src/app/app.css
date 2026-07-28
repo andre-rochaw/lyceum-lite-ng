@@ -9,6 +9,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: color-mix(in srgb, #000 25%, transparent);
+  background: color-mix(in srgb, #0f172a 28%, transparent);
+  backdrop-filter: blur(2px);
   pointer-events: none;
+  transition: opacity var(--app-transition);
 }

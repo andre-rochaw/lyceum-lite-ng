@@ -1,22 +1,3 @@
 :host {
   display: block;
 }
-
-.list-toolbar {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 1rem;
-}
-
-.search-field {
-  width: 100%;
-  max-width: 24rem;
-  flex: 1 1 16rem;
-}
-
-.table-wrap {
-  overflow-x: auto;
-  border-radius: 8px;
-  background: var(--mat-sys-surface-container-lowest, transparent);
-}

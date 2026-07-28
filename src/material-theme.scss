@@ -1,54 +1,128 @@
-// Include theming for Angular Material with `mat.theme()`.
-// https://material.angular.dev/guide/theming
 @use '@angular/material' as mat;
+@use './theme-colors' as lyceum;
 
 html {
   height: 100%;
+  color-scheme: light;
+
   @include mat.theme(
     (
       color: (
-        primary: mat.$azure-palette,
-        tertiary: mat.$blue-palette,
+        primary: lyceum.$primary-palette,
+        tertiary: lyceum.$tertiary-palette,
       ),
-      typography: Roboto,
+      typography: (
+        plain-family: Inter,
+        brand-family: Inter,
+      ),
       density: 0,
     )
   );
 
-  // Official Card token overrides (color / typography / shape).
-  // Width is NOT a Material token — see layout section below.
-  // https://material.angular.dev/components/card/styling
+  /* Brand tokens ? exact palette via light-dark (no duplicated theme CSS) */
+  --mat-sys-primary: light-dark(#2563eb, #60a5fa);
+  --mat-sys-on-primary: light-dark(#ffffff, #0f172a);
+  --mat-sys-primary-container: light-dark(#dbeafe, #1e3a8a);
+  --mat-sys-on-primary-container: light-dark(#1e3a8a, #dbeafe);
+  --mat-sys-secondary: light-dark(#0f766e, #2dd4bf);
+  --mat-sys-on-secondary: light-dark(#ffffff, #042f2e);
+  --mat-sys-secondary-container: light-dark(#ccfbf1, #134e4a);
+  --mat-sys-on-secondary-container: light-dark(#134e4a, #ccfbf1);
+  --mat-sys-error: light-dark(#dc2626, #f87171);
+  --mat-sys-on-error: light-dark(#ffffff, #450a0a);
+  --mat-sys-surface: light-dark(#ffffff, #1e293b);
+  --mat-sys-on-surface: light-dark(#0f172a, #f8fafc);
+  --mat-sys-surface-container: light-dark(#f1f5f9, #1e293b);
+  --mat-sys-surface-container-low: light-dark(#f8fafc, #1e293b);
+  --mat-sys-surface-container-lowest: light-dark(#ffffff, #1e293b);
+  --mat-sys-surface-container-high: light-dark(#e2e8f0, #334155);
+  --mat-sys-surface-container-highest: light-dark(#e2e8f0, #334155);
+  --mat-sys-background: light-dark(#f8fafc, #0f172a);
+  --mat-sys-on-background: light-dark(#0f172a, #f8fafc);
+  --mat-sys-outline: light-dark(#e2e8f0, #334155);
+  --mat-sys-outline-variant: light-dark(#e2e8f0, #334155);
+  --mat-sys-on-surface-variant: light-dark(#64748b, #cbd5e1);
+
   @include mat.card-overrides(
     (
-      title-text-size: 1.75rem,
+      title-text-size: 1.875rem,
       title-text-line-height: 2.25rem,
       subtitle-text-size: 1rem,
       subtitle-text-line-height: 1.5rem,
       elevated-container-shape: 16px,
+      outlined-container-shape: 16px,
+    )
+  );
+
+  @include mat.form-field-overrides(
+    (
+      outlined-container-shape: 12px,
+      container-height: 48px,
+    )
+  );
+
+  @include mat.button-overrides(
+    (
+      filled-container-shape: 999px,
+      outlined-container-shape: 999px,
+      protected-container-shape: 999px,
+      text-container-shape: 999px,
+      tonal-container-shape: 999px,
+      filled-container-height: 44px,
+      outlined-container-height: 44px,
+      protected-container-height: 44px,
+      text-container-height: 44px,
+      tonal-container-height: 44px,
+      filled-horizontal-padding: 20px,
+      outlined-horizontal-padding: 20px,
+      protected-horizontal-padding: 20px,
+      text-horizontal-padding: 20px,
+      tonal-horizontal-padding: 20px,
+      protected-container-elevation-shadow: 0 1px 2px color-mix(in srgb, #0f172a 8%, transparent),
+    )
+  );
+
+  @include mat.dialog-overrides(
+    (
+      container-shape: 20px,
+    )
+  );
+
+  @include mat.snack-bar-overrides(
+    (
+      container-shape: 12px,
     )
   );
 }
 
-body {
-  color-scheme: light;
-  background-color: var(--mat-sys-surface);
-  color: var(--mat-sys-on-surface);
-  font: var(--mat-sys-body-medium);
-  margin: 0;
-  height: 100%;
+html.dark-theme {
+  color-scheme: dark;
 }
 
-/* App layout — Material docs: size/spacing of hosts is application CSS */
+body {
+  background-color: var(--mat-sys-background);
+  color: var(--mat-sys-on-surface);
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.5;
+  margin: 0;
+  height: 100%;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
 .mat-mdc-card-title {
   text-align: center;
+  font-weight: 600;
 }
 
 .mat-mdc-card-subtitle {
   padding: 10px;
   text-align: center;
+  color: var(--mat-sys-on-surface-variant);
 }
 
-/* Auth cards ? preenche o host (largura 60% fica no auth-layout) */
 .auth-card.mat-mdc-card {
   display: block;
   width: 100%;
@@ -59,6 +133,19 @@ body {
 .auth-card .mat-mdc-card-header {
   display: block;
   width: 100%;
+  padding: 1rem;
+}
+
+.mat-mdc-card > .mat-mdc-card-header {
+  display: block;
+  width: 100%;
+  padding: 1rem;
+}
+
+.mat-mdc-card > .mat-mdc-card-content {
+  display: block;
+  width: 100%;
+  padding: 0rem 1rem;
 }
 
 .auth-card__content {
