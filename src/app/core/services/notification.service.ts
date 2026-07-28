@@ -4,6 +4,7 @@ import { MatSnackBar, MatSnackBarConfig } from '@angular/material/snack-bar';
 const TOAST_POSITION: MatSnackBarConfig = {
   verticalPosition: 'top',
   horizontalPosition: 'center',
+  politeness: 'assertive',
 };
 
 @Injectable({ providedIn: 'root' })

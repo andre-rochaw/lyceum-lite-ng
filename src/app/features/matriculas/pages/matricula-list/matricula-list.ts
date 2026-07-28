@@ -347,7 +347,7 @@ export class MatriculaList implements OnInit {
       this.actionInProgress.set(true);
       this.matriculaService.confirmar(row.id).subscribe({
         next: () => {
-          this.notifications.success('Matricula confirmada com sucesso');
+          this.notifications.success('Matrícula confirmada com sucesso');
           this.actionInProgress.set(false);
           this.carregar();
         },
@@ -373,7 +373,7 @@ export class MatriculaList implements OnInit {
       this.actionInProgress.set(true);
       this.matriculaService.cancelar(row.id).subscribe({
         next: () => {
-          this.notifications.success('Matricula cancelada com sucesso');
+          this.notifications.success('Matrícula cancelada com sucesso');
           this.actionInProgress.set(false);
           this.carregar();
         },

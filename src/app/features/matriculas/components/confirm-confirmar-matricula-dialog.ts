@@ -23,9 +23,9 @@ export interface ConfirmConfirmarMatriculaData {
     MatDialogClose,
   ],
   template: `
-    <h2 mat-dialog-title>Confirmar matricula</h2>
+    <h2 mat-dialog-title>Confirmar matrícula</h2>
     <mat-dialog-content>
-      Deseja confirmar esta matricula?
+      Deseja confirmar esta matrícula?
       <p class="dialog-detail">
         <strong>{{ data.alunoNome }}</strong> em
         <strong>{{ data.turmaNome }}</strong>
@@ -33,7 +33,13 @@ export interface ConfirmConfirmarMatriculaData {
     </mat-dialog-content>
     <mat-dialog-actions align="end">
       <button mat-button mat-dialog-close type="button">Cancelar</button>
-      <button mat-flat-button color="primary" [mat-dialog-close]="true" type="button">
+      <button
+        mat-flat-button
+        color="primary"
+        class="confirm-action"
+        [mat-dialog-close]="true"
+        type="button"
+      >
         Confirmar
       </button>
     </mat-dialog-actions>
@@ -42,6 +48,12 @@ export interface ConfirmConfirmarMatriculaData {
     .dialog-detail {
       margin: 0.75rem 0 0;
       opacity: 0.85;
+    }
+    .confirm-action {
+      --mdc-filled-button-container-color: var(--app-color-primary, #2563eb);
+      --mdc-filled-button-label-text-color: #ffffff;
+      background-color: var(--app-color-primary, #2563eb) !important;
+      color: #ffffff !important;
     }
   `,
 })

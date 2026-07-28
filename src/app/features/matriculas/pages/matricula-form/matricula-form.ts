@@ -247,7 +247,7 @@ export class MatriculaForm implements OnInit {
 
     this.matriculaService.criar(body).subscribe({
       next: () => {
-        this.notifications.success('Matricula criada com sucesso');
+        this.notifications.success('Matrícula criada com sucesso');
         void this.router.navigateByUrl('/matriculas');
         this.submitting.set(false);
       },

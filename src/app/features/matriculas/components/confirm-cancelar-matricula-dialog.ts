@@ -23,9 +23,9 @@ export interface ConfirmCancelarMatriculaData {
     MatDialogClose,
   ],
   template: `
-    <h2 mat-dialog-title>Cancelar matricula</h2>
+    <h2 mat-dialog-title>Cancelar matrícula</h2>
     <mat-dialog-content>
-      Deseja cancelar esta matricula?
+      Deseja cancelar esta matrícula?
       <p class="dialog-detail">
         <strong>{{ data.alunoNome }}</strong> em
         <strong>{{ data.turmaNome }}</strong>
@@ -34,7 +34,7 @@ export interface ConfirmCancelarMatriculaData {
     <mat-dialog-actions align="end">
       <button mat-button mat-dialog-close type="button">Voltar</button>
       <button mat-flat-button color="warn" [mat-dialog-close]="true" type="button">
-        Cancelar matricula
+        Cancelar matrícula
       </button>
     </mat-dialog-actions>
   `,
